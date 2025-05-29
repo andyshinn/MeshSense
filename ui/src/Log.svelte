@@ -6,7 +6,8 @@
   import { messageDestination } from './Message.svelte'
   import OpenLayersMap from './lib/OpenLayersMap.svelte'
   import { tick } from 'svelte'
-  import { getIconURL, getSvgUri } from './Map.svelte'
+  import { getSvgUri } from './Map.svelte'
+  import { highlightOwnNode } from './Settings.svelte'
 
   function shouldPacketBeShown(packet: MeshPacket, includeTx, filterText: string) {
     if (filterText) {
@@ -68,7 +69,7 @@
   function showPin(packet: MeshPacket) {
     let node = getNodeById(packet.from)
     let description = getNodeName(node)
-    let icon = getIconURL(node)
+    let icon = getSvgUri(String(node.num))
     if (packet.rxTime) {
       description += ' (' + new Date(packet.rxTime * 1000).toLocaleString(undefined, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: 'numeric' }) + ')'
     }
@@ -100,7 +101,7 @@
   <div bind:this={packetsDiv} class="p-1 px-2 text-sm overflow-auto grid h-full content-start overflow-x-hidden">
     {#each $packets.filter((p) => shouldPacketBeShown(p, includeTx, filterText)) || [] as packet}
       {#if !messagesOnly || packet.message?.show}
-        <div class="flex gap-2 whitespace-nowrap">
+        <div class="flex gap-2 whitespace-nowrap {($highlightOwnNode && packet.from === $myNodeNum) ? 'text-white/90' : ''}">
           <div class="w-28">{packet.rxTime ? new Date(packet.rxTime * 1000).toLocaleString(undefined, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: 'numeric' }) : ''}</div>
 
           <!-- Nodes -->

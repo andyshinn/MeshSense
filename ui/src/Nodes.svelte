@@ -12,15 +12,16 @@
 
 <script lang="ts">
   import Card from './lib/Card.svelte'
-  import { getCoordinates, getNodeName, getNodeNameById, hasAccess, unixSecondsTimeAgo } from './lib/util'
+  import { formatTemp, getCoordinates, getNodeName, getNodeNameById, hasAccess, displayFahrenheit, unixSecondsTimeAgo } from './lib/util'
   import Microchip from './lib/icons/Microchip.svelte'
   import axios from 'axios'
   import Modal from './lib/Modal.svelte'
   import { writable } from 'svelte/store'
   import OpenLayersMap from './lib/OpenLayersMap.svelte'
   import { messageDestination } from './Message.svelte'
-  import { setPositionMode } from './Map.svelte'
+  import { getSvgUri, setPositionMode } from './Map.svelte'
   import ChannelUtilization from './lib/ChannelUtilization.svelte'
+  import ObservedRF from './lib/ObservedRF.svelte'
 
   export let includeMqtt = (localStorage.getItem('includeMqtt') ?? 'true') == 'true'
   let selectedNode: NodeInfo
@@ -114,7 +115,7 @@
 
     <div class="flex items-center bg-black/20 rounded gap-2 grow">
       <h2 class="rounded">User ID</h2>
-      <div class="grow">!{String(selectedNode?.num.toString(16))}</div>
+      <div class="grow">!{String(selectedNode?.num?.toString(16)?.padStart(8, '0'))}</div>
     </div>
 
     {#if selectedNode?.num == $myNodeNum}
@@ -158,7 +159,7 @@
         {#if $smallMode}
           <!-- Short Mode -->
           <div title={node.user?.longName} class="flex items-center gap-1">
-            <img class="h-4 inline-block" src="https://icongaga-api.bytedancer.workers.dev/api/genHexer?name={node.num}" alt="Node {node.user?.id}" />
+            <img class="h-4 inline-block" src={getSvgUri(String(node.num))} alt="Node {node.user?.id}" />
 
             <div class="relative w-2 h-6">
               <!-- Channel Utilization for smallMode -->
@@ -169,16 +170,8 @@
             <button on:click={() => ($messageDestination = node.num)} class="bg-black/20 rounded w-12 text-center overflow-hidden">{node.user?.shortName || '?'}</button>
 
             {#if node.snr && node.hopsAway == 0}
-              <!-- SNR -->
-              <div title="SNR" class="text-sm w-10 shrink-0 text-center {node.snr && node.hopsAway == 0 ? 'bg-black/20' : ''} rounded h-5">
-                {node.snr}
-                <div class="h-0.5 -translate-y-0.5 scale-x-90" style="width: {((node.snr + 20) / 30) * 100}%; background-color: {node.snr >= 0 ? 'green' : node.snr >= -10 ? 'yellow' : 'red'};"></div>
-              </div>
-
-              <!-- RSSI -->
-              <div title="RSSI" class="text-sm w-8 shrink-0 text-center bg-black/20 rounded h-5">
-                {node.rssi || '-'}
-              </div>
+              <!-- display observed RF values for smallMode -->
+              <ObservedRF {node} />
             {:else}
               <!-- Hops -->
               <div title="{node.hopsAway} Hops Away" class="text-sm font-normal bg-black/20 rounded w-10 text-center">{node.num == $myNodeNum ? '-' : (node.hopsAway ?? '?')}</div>
@@ -187,7 +180,7 @@
         {:else}
           <!-- Large Mode -->
           <div class="flex gap-1 items-center">
-            <img class="h-4 inline-block" src="https://icongaga-api.bytedancer.workers.dev/api/genHexer?name={node.num}" alt="Node {node.user?.id}" />
+            <img class="h-4 inline-block" src={getSvgUri(String(node.num))} alt="Node {node.user?.id}" />
 
             <div class="relative w-2 h-6">
               <!-- Channel Utilization for largeMode -->
@@ -195,8 +188,8 @@
             </div>
 
             <!-- Longname -->
-            <button title={node.user?.longName || '!' + node.num?.toString(16)} class="text-left truncate max-w-44" on:click={() => ($messageDestination = node.num)}
-              >{node.user?.longName || '!' + node.num?.toString(16)}</button
+            <button title={node.user?.longName || '!' + node.num?.toString(16)?.padStart(8, '0')} class="text-left truncate max-w-44" on:click={() => ($messageDestination = node.num)}
+              >{node.user?.longName || '!' + node.num?.toString(16)?.padStart(8, '0')}</button
             >
 
             {#if node.user?.role != undefined}
@@ -222,23 +215,17 @@
                 <div title="Lost and Found Node" class="bg-indigo-500/50 text-indigo-300 rounded px-1 font-bold cursor-help">LF</div>
               {:else if node.user.role === 10}
                 <div title="TAK Tracker Node" class="bg-indigo-500/50 text-indigo-300 rounded px-1 font-bold cursor-help">TT</div>
+              {:else if node.user.role === 11}
+                <div title="Router_Late Node" class="bg-red-500/50 text-red-200 rounded px-1 font-bold cursor-help">RL</div>
               {/if}
             {/if}
             {#if node.viaMqtt}
               <div title="Node heard via MQTT" class="bg-rose-900/50 text-rose-200 rounded px-1 cursor-help text-xs">MQTT</div>
             {/if}
             <div class="grow"></div>
-            <!-- SNR -->
             {#if node.snr && node.hopsAway == 0}
-              <div title="SNR" class="text-sm w-10 shrink-0 text-center {node.snr && node.hopsAway == 0 ? 'bg-black/20' : ''} rounded h-5">
-                {node.snr}
-                <div class="h-0.5 -translate-y-0.5 scale-x-90" style="width: {((node.snr + 20) / 30) * 100}%; background-color: {node.snr >= 0 ? 'green' : node.snr >= -10 ? 'yellow' : 'red'};"></div>
-              </div>
-
-              <!-- RSSI -->
-              <div title="RSSI" class="text-sm w-8 shrink-0 text-center bg-black/20 rounded h-5">
-                {node.rssi || '-'}
-              </div>
+              <!-- display observed RF values -->
+              <ObservedRF {node} />
             {/if}
           </div>
 
@@ -327,7 +314,7 @@
             <div class="flex gap-1">
               {#if node.environmentMetrics.temperature}
                 <div title="Temperature" class="text-sm font-normal bg-purple-950/20 text-purple-200/90 rounded p-0.5 w-12 h-6 text-center overflow-hidden">
-                  {Math.round(node.environmentMetrics.temperature)} °C
+                  {formatTemp(node.environmentMetrics.temperature, $displayFahrenheit)}
                 </div>
               {/if}
               {#if node.environmentMetrics.barometricPressure}
