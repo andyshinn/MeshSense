@@ -34,7 +34,7 @@
   $: localStorage.setItem('includeMqtt', String(includeMqtt))
   $: localStorage.setItem('sortField', $sortField)
   $: localStorage.setItem('sortDirection', $sortDirection)
-  $: $nodes.length, $nodeInactiveTimer, $nodeVisibilityMode, includeMqtt, $sortField, $sortDirection, filterNodes()
+  $: $nodes.length, $nodeInactiveTimer, $nodeVisibilityMode, includeMqtt, $sortField, $sortDirection, $filterText, filterNodes()
 
   function filterNodes() {
     $inactiveNodes = $nodes.filter(isInactive)
