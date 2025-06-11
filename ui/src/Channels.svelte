@@ -1,7 +1,7 @@
 <script lang="ts">
   import { channels } from 'api/src/vars'
-  let selectedChannelIndex = 0
-  $: selectedChannel = $channels?.[selectedChannelIndex]
+  let selectedChannelIndex = $state(0)
+  let selectedChannel = $derived($channels?.[selectedChannelIndex])
 
   function onchange(e) {
     channels.upsert(selectedChannel)
@@ -15,12 +15,12 @@
         class="btn w-32 min-h-8 text-sm
         {channelIndex == selectedChannelIndex ? 'outline outline-1 outline-blue-500' : '-hue-rotate-60 saturate-50'}
         {channel.role == 0 ? '!saturate-0' : ''}"
-        on:click={() => (selectedChannelIndex = channelIndex)}>{channelIndex} {channel.settings?.name ? `- ${channel?.settings.name}` : ''}</button
+        onclick={() => (selectedChannelIndex = channelIndex)}>{channelIndex} {channel.settings?.name ? `- ${channel?.settings.name}` : ''}</button
       >
     {/each}
   </div>
   {#if selectedChannel}
-    <form on:change={onchange} class="flex flex-col gap-2">
+    <form {onchange} class="flex flex-col gap-2">
       <label class="flex gap-2 items-center">
         <div class="font-bold w-14">Name</div>
         <input class="input grow max-w-sm" type="text" bind:value={selectedChannel.settings.name} />

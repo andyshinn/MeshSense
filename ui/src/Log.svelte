@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { broadcastId, channels, myNodeNum, nodes, packets, version, type MeshPacket } from 'api/src/vars'
   import Card from './lib/Card.svelte'
   import { getNodeById, getNodeName, getNodeNameById, scrollToBottom, testPacket } from './lib/util'
@@ -19,22 +21,22 @@
     return true
   }
 
-  let packetsDiv: HTMLDivElement
-  let includeTx = false
-  let messagesOnly = false
-  let selectedPacket: MeshPacket
-  let filterText = ''
-  let unseenMessages = false
-  let showCsvModal = false
-  let csvText: string
-  let csvTextElement: HTMLPreElement
-  export let ol: OpenLayersMap = undefined
-
-  $: if ($packets) scrollToBottom(packetsDiv, false, (unseen) => (unseenMessages = unseen))
-  $: messagesOnly, scrollToBottom(packetsDiv, true, (unseen) => (unseenMessages = unseen))
-  $: if (showCsvModal) {
-    tick().then(selectCSV)
+  let packetsDiv: HTMLDivElement = $state()
+  let includeTx = $state(false)
+  let messagesOnly = $state(false)
+  let selectedPacket: MeshPacket = $state()
+  let filterText = $state('')
+  let unseenMessages = $state(false)
+  let showCsvModal = $state(false)
+  let csvText: string = $state()
+  let csvTextElement: HTMLPreElement = $state()
+  interface Props {
+    ol?: OpenLayersMap;
+    [key: string]: any
   }
+
+  let { ol = undefined, ...rest }: Props = $props();
+
 
   function selectCSV() {
     window.getSelection().selectAllChildren(csvTextElement)
@@ -77,6 +79,17 @@
     let long = packet.data.longitudeI / 10000000
     ol.showPin(description, long, lat, icon)
   }
+  run(() => {
+    if ($packets) scrollToBottom(packetsDiv, false, (unseen) => (unseenMessages = unseen))
+  });
+  run(() => {
+    messagesOnly, scrollToBottom(packetsDiv, true, (unseen) => (unseenMessages = unseen))
+  });
+  run(() => {
+    if (showCsvModal) {
+      tick().then(selectCSV)
+    }
+  });
 </script>
 
 <Modal title="Packet Detail" visible={selectedPacket != undefined}>
@@ -87,7 +100,8 @@
   <pre id="csvTextElement" bind:this={csvTextElement}>{csvText}</pre>
 </Modal>
 
-<Card title="Log" {...$$restProps} class="min-h-36">
+<Card title="Log" {...rest} class="min-h-36">
+  <!-- @migration-task: migrate this slot by hand, `title` would shadow a prop on the parent component -->
   <h2 slot="title" class="flex gap-2 font-bold rounded-t px-2">
     <div class="w-28">Date</div>
     <div class="w-44 whitespace-nowrap overflow-hidden">Nodes</div>
@@ -124,9 +138,9 @@
             {#if packet.hopStart}{packet.hopStart - packet.hopLimit} / {packet.hopStart}{/if}
           </div>
           <div class="w-8">
-            <button on:click={() => (selectedPacket = packet)}>🔍</button>
+            <button onclick={() => (selectedPacket = packet)}>🔍</button>
             {#if packet.data?.$typeName == 'meshtastic.Position'}
-              <button title="Fly To" on:click={() => showPin(packet)}>🌐</button>
+              <button title="Fly To" onclick={() => showPin(packet)}>🌐</button>
             {/if}
           </div>
           {#if packet.data?.variant?.case == 'deviceMetrics'}
@@ -159,9 +173,9 @@
       {#if packet.message?.show}
         <div class="bg-blue-500/20 rounded px-1 ring-1 my-0.5 text-sm w-fit">
           {#if packet.to == broadcastId}
-            <button on:click={() => ($messageDestination = packet.channel)} class="font-bold text-white">{channels.value[packet.channel]?.settings?.name || 'Primary'}</button>
+            <button onclick={() => ($messageDestination = packet.channel)} class="font-bold text-white">{channels.value[packet.channel]?.settings?.name || 'Primary'}</button>
           {/if}
-          <button class="font-bold" on:click={() => ($messageDestination = packet.from)}>{getNodeNameById(packet.from)}:</button>
+          <button class="font-bold" onclick={() => ($messageDestination = packet.from)}>{getNodeNameById(packet.from)}:</button>
           {packet.message.readable ?? packet.message.data}
         </div>
       {/if}
@@ -173,11 +187,11 @@
     <label>Messages Only <input type="checkbox" bind:checked={messagesOnly} /></label>
     <label class="flex gap-1"
       >Filter <input class="rounded bg-black text-blue-300 font-bold px-2 w-20" type="text" bind:value={filterText} />
-      {#if filterText}<button on:click={() => (filterText = '')} class="btn text-sm !py-0">Clear</button>{/if}
-      <button class="btn btn-sm text-xs" on:click={() => generateCSV()}>CSV</button>
-      {#if unseenMessages}<button class="btn !py-0 bottom-10" on:click={() => scrollToBottom(packetsDiv, true, (unseen) => (unseenMessages = unseen))}>Jump to new messages</button>{/if}
+      {#if filterText}<button onclick={() => (filterText = '')} class="btn text-sm !py-0">Clear</button>{/if}
+      <button class="btn btn-sm text-xs" onclick={() => generateCSV()}>CSV</button>
+      {#if unseenMessages}<button class="btn !py-0 bottom-10" onclick={() => scrollToBottom(packetsDiv, true, (unseen) => (unseenMessages = unseen))}>Jump to new messages</button>{/if}
       {#if !$version}
-        <button class="btn text-xs" on:click={testPacket}>Test Packet</button>
+        <button class="btn text-xs" onclick={testPacket}>Test Packet</button>
       {/if}
     </label>
   </h2>

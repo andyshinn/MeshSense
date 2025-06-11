@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
   export let showConfigModal = writable(false)
   let modalPage = writable('Settings')
 
@@ -26,7 +26,7 @@
       {#each ['Settings', 'Device', 'Channels', 'Log', 'Legal'] as category}
         <button
           class:hidden={['Log', 'Device', 'Channels'].includes(category) && !$hasAccess}
-          on:click={() => ($modalPage = category)}
+          onclick={() => ($modalPage = category)}
           class="btn btn-sm h-7 w-20 {$modalPage == category ? 'brightness-125' : 'grayscale'}">{category}</button
         >
       {/each}

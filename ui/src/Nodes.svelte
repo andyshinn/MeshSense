@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   import { currentTime, myNodeMetadata, myNodeNum, nodeInactiveTimer, nodes, pendingTraceroutes, type NodeInfo } from 'api/src/vars'
   export let smallMode = writable(false)
   export let selectNodeFilterInput = writable(false)
@@ -18,6 +18,8 @@
 </script>
 
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import Card from './lib/Card.svelte'
   import { formatTemp, getCoordinates, getNodeName, getNodeNameById, hasAccess, displayFahrenheit, unixSecondsTimeAgo } from './lib/util'
   import Microchip from './lib/icons/Microchip.svelte'
@@ -30,23 +32,19 @@
   import ChannelUtilization from './lib/ChannelUtilization.svelte'
   import ObservedRF from './lib/ObservedRF.svelte'
 
-  export let includeMqtt = (localStorage.getItem('includeMqtt') ?? 'true') == 'true'
-  let selectedNode: NodeInfo
-  let nodeFilterInput: HTMLInputElement
-  export let ol: OpenLayersMap = undefined
-  export let filterText = writable('')
-
-
-  $: if ($selectNodeFilterInput) {
-    nodeFilterInput.select()
-    selectNodeFilterInput.set(false)
+  let selectedNode: NodeInfo = $state()
+  let nodeFilterInput: HTMLInputElement = $state()
+  interface Props {
+    includeMqtt?: any;
+    ol?: OpenLayersMap;
+    filterText?: any;
+    [key: string]: any
   }
 
-  $: localStorage.setItem('nodeVisibilityMode', $nodeVisibilityMode)
-  $: localStorage.setItem('includeMqtt', String(includeMqtt))
-  $: localStorage.setItem('sortField', $sortField)
-  $: localStorage.setItem('sortDirection', $sortDirection)
-  $: $nodes.length, $nodeInactiveTimer, $nodeVisibilityMode, includeMqtt, $filterText, $sortField, $sortDirection, filterNodes()
+  let { includeMqtt = $bindable((localStorage.getItem('includeMqtt') ?? 'true') == 'true'), ol = undefined, filterText = writable(''), ...rest }: Props = $props();
+
+
+
 
   function filterNodes() {
     $inactiveNodes = $nodes.filter(isInactive)
@@ -185,6 +183,27 @@
   function toggleSortDirection() {
     $sortDirection = $sortDirection === 'asc' ? 'desc' : 'asc'
   }
+  run(() => {
+    if ($selectNodeFilterInput) {
+      nodeFilterInput.select()
+      selectNodeFilterInput.set(false)
+    }
+  });
+  run(() => {
+    localStorage.setItem('nodeVisibilityMode', $nodeVisibilityMode)
+  });
+  run(() => {
+    localStorage.setItem('includeMqtt', String(includeMqtt))
+  });
+  run(() => {
+    localStorage.setItem('sortField', $sortField)
+  });
+  run(() => {
+    localStorage.setItem('sortDirection', $sortDirection)
+  });
+  run(() => {
+    $nodes.length, $nodeInactiveTimer, $nodeVisibilityMode, includeMqtt, $filterText, $sortField, $sortDirection, filterNodes()
+  });
 </script>
 
 <Modal title="Node Detail" visible={selectedNode != undefined}>
@@ -214,7 +233,8 @@
   <pre class="mt-2 overflow-auto rounded p-2 h-full bg-black/20">{JSON.stringify(selectedNode, undefined, 2)}</pre>
 </Modal>
 
-<Card title="Nodes" {...$$restProps}>
+<Card title="Nodes" {...rest}>
+  <!-- @migration-task: migrate this slot by hand, `title` would shadow a prop on the parent component -->
   <h2 slot="title" class="rounded-t flex items-center gap-2">
     <div class="flex items-center gap-2">
       <div class="grow flex items-center gap-2">
@@ -222,7 +242,7 @@
         {#if !$smallMode}
           <button
             title="Toggle Visibility - Currently Showing: {$nodeVisibilityMode}"
-            on:click={toggleNodeVisibility}
+            onclick={toggleNodeVisibility}
             class="text-xs font-normal ml-1 {
               $nodeVisibilityMode === 'active' ? 'btn-active' :
               $nodeVisibilityMode === 'inactive' ? 'btn-inactive' :
@@ -243,22 +263,18 @@
             <option value="snr">SNR</option>
             <option value="channelUtilization">Channel Util</option>
           </select>
-          <button title="Toggle Sort Direction" on:click={toggleSortDirection} class="btn text-xs font-normal">
+          <button title="Toggle Sort Direction" onclick={toggleSortDirection} class="btn text-xs font-normal">
             {$sortDirection === 'asc' ? '↑' : '↓'}
           </button>
         {/if}
       </div>
       {#if !$smallMode}
-        <button title="Toggle MQTT Nodes" on:click={() => (includeMqtt = !includeMqtt)} class="text-xs font-normal {includeMqtt ? 'btn' : 'btn-inactive'}">
+        <button title="Toggle MQTT Nodes" onclick={() => (includeMqtt = !includeMqtt)} class="text-xs font-normal {includeMqtt ? 'btn' : 'btn-inactive'}">
           MQTT
         </button>
       {/if}
-      <button title="Reduce/Expand Node List" on:click={() => ($smallMode = !$smallMode)} class="btn !px-2 text-sm font-normal">{$smallMode ? '→' : '←'}</button>
+      <button title="Reduce/Expand Node List" onclick={() => ($smallMode = !$smallMode)} class="btn !px-2 text-sm font-normal">{$smallMode ? '→' : '←'}</button>
     </div>
-    {#if !$smallMode}
-      <button title="Toggle MQTT Nodes" on:click={() => (includeMqtt = !includeMqtt)} class="text-xs font-normal {includeMqtt ? 'btn' : 'btn-inactive'}"> MQTT </button>
-    {/if}
-    <button title="Reduce/Expand Node List" on:click={() => ($smallMode = !$smallMode)} class="btn !px-2 text-sm font-normal">{$smallMode ? '→' : '←'}</button>
   </h2>
   <div>
   {#if !$smallMode}
@@ -287,7 +303,7 @@
               </div>
 
               <!-- Shortname -->
-              <button on:click={() => ($messageDestination = node.num)} class="bg-black/20 rounded w-12 text-center overflow-hidden">{node.user?.shortName || '?'}</button>
+              <button onclick={() => ($messageDestination = node.num)} class="bg-black/20 rounded w-12 text-center overflow-hidden">{node.user?.shortName || '?'}</button>
 
               {#if node.snr && node.hopsAway == 0}
                 <!-- display observed RF values for smallMode -->
@@ -308,7 +324,7 @@
               </div>
 
               <!-- Longname -->
-              <button title={node.user?.longName || '!' + node.num?.toString(16)?.padStart(8, '0')} class="text-left truncate max-w-44" on:click={() => ($messageDestination = node.num)}
+              <button title={node.user?.longName || '!' + node.num?.toString(16)?.padStart(8, '0')} class="text-left truncate max-w-44" onclick={() => ($messageDestination = node.num)}
                 >{node.user?.longName || '!' + node.num?.toString(16)?.padStart(8, '0')}</button
               >
 
@@ -351,7 +367,7 @@
 
             <div class="flex gap-1.5 items-center">
               <!-- Shortname -->
-              <button title="Short Name" on:click={() => ($messageDestination = node.num)} class="bg-black/20 rounded p-1 w-12 text-center overflow-hidden">{node.user?.shortName || '?'}</button>
+              <button title="Short Name" onclick={() => ($messageDestination = node.num)} class="bg-black/20 rounded p-1 w-12 text-center overflow-hidden">{node.user?.shortName || '?'}</button>
 
               <!-- Last Heard -->
               {#key $currentTime}
@@ -380,7 +396,7 @@
               <!-- Hops -->
               <div title="{node.hopsAway} Hops Away" class="text-sm font-normal bg-black/20 rounded p-1 w-6 h-7 text-center">{node.num == $myNodeNum ? '-' : (node.hopsAway ?? '?')}</div>
 
-              <button title="Node Detail" on:click={() => (selectedNode = node)}>🔍</button>
+              <button title="Node Detail" onclick={() => (selectedNode = node)}>🔍</button>
               <!-- <button class="h-7 w-5" on:click={() => send(prompt('Enter message to send'), node.num)}>🗨</button> -->
 
               {#if node.num != $myNodeNum}
@@ -389,10 +405,10 @@
                     ? 'hue-rotate-90 animate-pulse'
                     : ''}"
                   title="Traceroute {node.hopsAway == 0 ? 'Direct' : ''}{node?.trace ? [$myNodeNum, ...node?.trace?.route, node?.num].map((id) => getNodeNameById(id)).join(' -> ') : ''}"
-                  on:click={() => axios.post('/traceRoute', { destination: node.num })}>↯</button
+                  onclick={() => axios.post('/traceRoute', { destination: node.num })}>↯</button
                 >
               {:else if $hasAccess}
-                <button title="Set Position" class="rounded-md fill-cyan-400/80 text-lg -mx-0.5" on:click={() => ($setPositionMode = true)}
+                <button title="Set Position" class="rounded-md fill-cyan-400/80 text-lg -mx-0.5" onclick={() => ($setPositionMode = true)}
                   ><svg width="24px" height="24px" viewBox="0 0 512 512" data-name="Layer 1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
                     ><path
                       d="M321.85,250.69c-4-33.61-30.39-61-65.85-61-36,0-66.34,30.31-66.34,66.34S220,322.34,256,322.34c35.47,0,61.84-27.41,65.85-61a18.39,18.39,0,0,0,.49-5.32A18.71,18.71,0,0,0,321.85,250.69ZM225.12,256c0-39.95,59.88-39.6,61.76,0C285,295.55,225.12,296,225.12,256Z"
@@ -411,7 +427,7 @@
                 <button
                   class="h-7 w-5"
                   title="Fly To"
-                  on:click={(e) => {
+                  onclick={(e) => {
                     if (e.shiftKey || e.ctrlKey) axios.post('/requestPosition', { destination: node.num })
                     let [long, lat] = getCoordinates(node)
                     ol.flyTo(long, lat)
@@ -422,7 +438,7 @@
                 <button
                   class="h-7 w-5"
                   title="Request Position"
-                  on:click={(e) => {
+                  onclick={(e) => {
                     axios.post('/requestPosition', { destination: node.num })
                   }}
                   >📡
@@ -463,7 +479,7 @@
         </div>
       {/each}
       {#if $hasAccess && $nodeVisibilityMode !== 'active' && $inactiveNodes.length >= 10}
-        <button on:click={clearNodes} class="btn h-12">Clear {$inactiveNodes?.length} Inactive Nodes</button>
+        <button onclick={clearNodes} class="btn h-12">Clear {$inactiveNodes?.length} Inactive Nodes</button>
       {/if}
     </div>
   </div>

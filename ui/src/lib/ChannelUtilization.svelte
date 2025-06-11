@@ -1,10 +1,14 @@
 <script lang="ts">
   import type { NodeInfo } from 'api/src/vars'
-  export let node: NodeInfo
+  interface Props {
+    node: NodeInfo;
+  }
 
-  $: channelUtilizationINT = node?.deviceMetrics?.channelUtilization ? Math.floor(node.deviceMetrics.channelUtilization) : null
+  let { node }: Props = $props();
 
-  $: scaledHeight = channelUtilizationINT !== null ? Math.min(channelUtilizationINT * 2, 100) : 0
+  let channelUtilizationINT = $derived(node?.deviceMetrics?.channelUtilization ? Math.floor(node.deviceMetrics.channelUtilization) : null)
+
+  let scaledHeight = $derived(channelUtilizationINT !== null ? Math.min(channelUtilizationINT * 2, 100) : 0)
 
   function getColorClass(channelUtilizationINT: number) {
     if (!channelUtilizationINT) return 'grayscale' // default color when channelUtilizationINT is null

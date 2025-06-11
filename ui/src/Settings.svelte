@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
   import { entries, get, set } from 'idb-keyval'
   export let updateChannel = new State('updateChannel', undefined)
   export let enableAudioAlerts = writable()
@@ -11,6 +11,8 @@
 </script>
 
 <script>
+  import { preventDefault } from 'svelte/legacy';
+
   import {
     accessKey,
     apiHostname,
@@ -33,7 +35,7 @@
   import axios from 'axios'
   import { writable } from 'svelte/store'
 
-  let clientKeyInput = $userKey
+  let clientKeyInput = $state($userKey)
 
   function applyClientKey() {
     userKey.set(clientKeyInput)
@@ -108,7 +110,7 @@
         class="input w-28"
         type="number"
         min={15}
-        on:change={(e) => {
+        onchange={(e) => {
           let newValue = Math.max(Number(e.currentTarget.value), 15)
           $tracerouteRateLimit = newValue
           e.currentTarget.value = String(newValue)
@@ -146,14 +148,14 @@
       <input
         type="checkbox"
         checked={$updateChannel == 'beta'}
-        on:change={async (e) => {
+        onchange={async (e) => {
           e.currentTarget.checked ? ($updateChannel = 'beta') : ($updateChannel = 'latest')
           await tick()
           axios.get('/checkUpdate')
         }}
       />
       <div class="font-bold">MeshSense Beta Updates</div>
-      <button class="btn !mr-auto" on:click={() => axios.get('/checkUpdate')}>Check for updates</button>
+      <button class="btn !mr-auto" onclick={() => axios.get('/checkUpdate')}>Check for updates</button>
     </label>
 
     <hr class="opacity-25" />
@@ -185,7 +187,7 @@
       <span class="font-mono bg-black/20 px-2 rounded py-0.5">Client Access Key</span> to gain access.
     </div>
   {:else if !$blockUserKey}
-    <form on:submit|preventDefault={applyClientKey}>
+    <form onsubmit={preventDefault(applyClientKey)}>
       <label>
         <div class="font-bold">Client Access Key</div>
         <input class="input" type="password" bind:value={clientKeyInput} />

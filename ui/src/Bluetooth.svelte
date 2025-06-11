@@ -5,12 +5,17 @@
   import { smallMode } from './Nodes.svelte'
   import axios from 'axios'
   import { hasAccess } from './lib/util'
+  interface Props {
+    [key: string]: any
+  }
+
+  let { ...rest }: Props = $props();
 
   let bluetoothDeviceList = new State<{ id: string; name: string }[]>('bluetoothDeviceList', [])
 </script>
 
 {#if $connectionStatus == 'disconnected' && $hasAccess}
-  <Card title="BLE Devices" {...$$restProps}>
+  <Card title="BLE Devices" {...rest}>
     <div class="text-sm p-2 flex flex-col gap-1">
       {#if $bluetoothDeviceList.length == 0}
         <p>
@@ -21,7 +26,7 @@
         <button
           class="btn"
           class:hidden={name.startsWith('Unknown or Unsupported Device')}
-          on:click={() => {
+          onclick={() => {
             $address = id
             axios.post('/connect', { address: id })
           }}

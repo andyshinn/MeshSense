@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import axios from 'axios'
   import { onDestroy, onMount, tick } from 'svelte'
   import { scrollToBottom, userKey } from './lib/util'
@@ -6,10 +8,12 @@
 
   let ansi = new AnsiUp()
 
-  let log: string[] = []
-  let logElement: HTMLPreElement
+  let log: string[] = $state([])
+  let logElement: HTMLPreElement = $state()
 
-  $: if (log && logElement) scrollToBottom(logElement)
+  run(() => {
+    if (log && logElement) scrollToBottom(logElement)
+  });
 
   async function getLog() {
     try {
@@ -27,5 +31,5 @@
 
 <div class="flex flex-col gap-4">
   <pre bind:this={logElement} class="whitespace-pre-line overflow-auto h-80 rounded ring bg-black/20 p-4">{#each log as line}{@html ansi.ansi_to_html(line)}{/each}</pre>
-  <button class="btn btn-sm" on:click={() => scrollToBottom(logElement, true)}>Scroll to bottom</button>
+  <button class="btn btn-sm" onclick={() => scrollToBottom(logElement, true)}>Scroll to bottom</button>
 </div>
