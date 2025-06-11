@@ -10,7 +10,8 @@ export default defineConfig({
     port: process.env.PORT || '5921'
   },
   build: {
-    sourcemap: true
+    sourcemap: true,
+    chunkSizeWarningLimit: 1000
   },
   // plugins: [basicSsl(), svelte()]
   plugins: [svelte()]
