@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
   export let showConfigModal = writable(false)
   let modalPage = writable('Settings')
 
@@ -22,11 +22,11 @@
 <Modal title="MeshSense" bind:visible={$showConfigModal}>
   <div class="grid grid-rows-[auto_1fr] gap-2">
     <!-- Sidebar -->
-    <div class="flex gap-1 -m-2 px-2 p-2 flex-wrap items-center border-b border-black/20 to-black/10 bg-gradient-to-b from-transparent">
+    <div class="flex gap-1 -m-2 px-2 p-2 flex-wrap items-center border-b border-black/20 to-black/10 bg-linear-to-b from-transparent">
       {#each ['Settings', 'Device', 'Channels', 'Log', 'Legal'] as category}
         <button
           class:hidden={['Log', 'Device', 'Channels'].includes(category) && !$hasAccess}
-          on:click={() => ($modalPage = category)}
+          onclick={() => ($modalPage = category)}
           class="btn btn-sm h-7 w-20 {$modalPage == category ? 'brightness-125' : 'grayscale'}">{category}</button
         >
       {/each}

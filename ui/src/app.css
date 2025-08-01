@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 #app {
   display: contents;
@@ -39,19 +39,19 @@ body {
   /* min-width: 320px; */
   min-height: 100vh;
   height: 100vh;
-  @apply from-slate-600 bg-gradient-to-br to-blue-950;
+  @apply from-slate-600 bg-linear-to-br to-blue-950;
 }
 
 h2 {
-  @apply select-none bg-gradient-to-br from-black to-blue-950 p-1 px-3 font-bold text-white;
+  @apply select-none bg-linear-to-br from-black to-blue-950 p-1 px-3 font-bold text-white;
 }
 
 .header-t {
-  @apply select-none bg-gradient-to-br from-black to-blue-950 p-1 px-3 font-bold text-white rounded-t;
+  @apply select-none bg-linear-to-br from-black to-blue-950 p-1 px-3 font-bold text-white rounded-t-sm;
 }
 
 .header-t + * {
-  @apply rounded-b p-1 px-3 shadow-inner shadow-black/50 bg-black/20;
+  @apply rounded-b-sm p-1 px-3 shadow-inner shadow-black/50 bg-black/20;
 }
 
 .input {
@@ -69,7 +69,7 @@ h1 {
 }
 
 .btn {
-  @apply px-2 py-0.5 from-blue-800 bg-gradient-to-br to-cyan-700 rounded text-blue-100  border-blue-500;
+  @apply px-2 py-0.5 from-blue-800 bg-linear-to-br to-cyan-700 rounded text-blue-100  border-blue-500;
 }
 
 .btn-inactive {

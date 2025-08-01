@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   import { writable } from 'svelte/store'
   export let newsVisible = writable(false)
 
@@ -6,15 +6,19 @@
 </script>
 
 <script>
+  import { run } from 'svelte/legacy';
+
   import Modal from './lib/Modal.svelte'
   import { meshSenseNewsDate } from 'api/src/vars'
   console.log({ lastViewedNewsDate })
-  $: if (lastViewedNewsDate < $meshSenseNewsDate) {
-    console.log({ lastViewedNewsDate, $meshSenseNewsDate })
-    newsVisible.set(true)
-    lastViewedNewsDate = $meshSenseNewsDate
-    localStorage.setItem('lastViewedNewsDate', String($meshSenseNewsDate))
-  }
+  run(() => {
+    if (lastViewedNewsDate < $meshSenseNewsDate) {
+      console.log({ lastViewedNewsDate, $meshSenseNewsDate })
+      newsVisible.set(true)
+      lastViewedNewsDate = $meshSenseNewsDate
+      localStorage.setItem('lastViewedNewsDate', String($meshSenseNewsDate))
+    }
+  });
 </script>
 
 <Modal title="Here's the latest in MeshSense!" bind:visible={$newsVisible} fillHeight={true}>

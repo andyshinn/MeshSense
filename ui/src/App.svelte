@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   import axios from 'axios'
   import Address from './Address.svelte'
   // import ServiceWorker from './lib/ServiceWorker.svelte'
@@ -20,7 +20,7 @@
 </script>
 
 <script lang="ts">
-  let ol: OpenLayersMap
+  let ol: OpenLayersMap = $state()
 
   import { onMount } from 'svelte'
   import { showPage } from './SettingsModal.svelte'
@@ -78,8 +78,8 @@
         </div>
         <div class="font-normal absolute m-2 top-0 right-0 flex gap-2 items-center">
           <div class="text-xs text-white/50 pr-2 font-bold">MeshSense {$version}</div>
-          <button class="btn btn-sm h-6 grid place-content-center" on:click={() => newsVisible.set(true)}>📰</button>
-          <button class="btn btn-sm h-6 grid place-content-center" on:click={() => showPage('Settings')}>⚙</button>
+          <button class="btn btn-sm h-6 grid place-content-center" onclick={() => newsVisible.set(true)}>📰</button>
+          <button class="btn btn-sm h-6 grid place-content-center" onclick={() => showPage('Settings')}>⚙</button>
         </div>
       </div>
     {/if}

@@ -27,18 +27,28 @@
 
   // export let maxDevicePoints = 10
 
-  let mapElement: HTMLDivElement
+  let mapElement: HTMLDivElement = $state()
   let map: Map
   let layers: Record<string, Layer> = {}
 
   const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
   let darkMode = (localStorage.getItem('darkMode') ?? String(prefersDarkMode)) == 'true'
 
-  export let center = undefined
-  export let zoom = 12
-  export let onMove: (center: Coordinate, zoom: number) => void = undefined
-  export let onClick: (latitude: number, longitude: number) => void = undefined
-  export let onDarkModeToggle: () => void = undefined
+  interface Props {
+    center?: any;
+    zoom?: number;
+    onMove?: (center: Coordinate, zoom: number) => void;
+    onClick?: (latitude: number, longitude: number) => void;
+    onDarkModeToggle?: () => void;
+  }
+
+  let {
+    center = $bindable(undefined),
+    zoom = $bindable(12),
+    onMove = undefined,
+    onClick = undefined,
+    onDarkModeToggle = undefined
+  }: Props = $props();
 
   if (!center || (center[0] == 0 && center[1] == 0)) {
     center = [-90.3242479, 39.5167587]
@@ -279,4 +289,4 @@
   })
 </script>
 
-<div bind:this={mapElement} class="h-full" />
+<div bind:this={mapElement} class="h-full"></div>
