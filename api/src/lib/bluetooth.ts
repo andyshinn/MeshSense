@@ -18,7 +18,7 @@ export async function scanForDevice() {
   console.log('[bluetooth] scanning...')
 
   try {
-    let device: BluetoothDeviceImpl = await bluetooth.requestDevice({ acceptAllDevices: true }).catch((e) => console.warn(e))
+    let device: BluetoothDeviceImpl | undefined = await bluetooth.requestDevice({ acceptAllDevices: true }).catch((e) => console.warn(e))
     // let device = await bluetooth.requestDevice({ filters: [{ services: [Constants.ServiceUuid] }] }).catch((e) => console.error(e))
     // let device = await bluetooth.requestDevice({ filters: [{ serviceData: [] }] }).catch((e) => console.error(e))
     // let device = await bluetooth
