@@ -410,7 +410,7 @@
                   onclick={() => axios.post('/traceRoute', { destination: node.num })}>↯</button
                 >
               {:else if $hasAccess}
-                <button title="Set Position" class="rounded-md fill-cyan-400/80 text-lg -mx-0.5" onclick={() => ($setPositionMode = true)}
+                <button title="Set Position" aria-label="Set Position" class="rounded-md fill-cyan-400/80 text-lg -mx-0.5" onclick={() => ($setPositionMode = true)}
                   ><svg width="24px" height="24px" viewBox="0 0 512 512" data-name="Layer 1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
                     ><path
                       d="M321.85,250.69c-4-33.61-30.39-61-65.85-61-36,0-66.34,30.31-66.34,66.34S220,322.34,256,322.34c35.47,0,61.84-27.41,65.85-61a18.39,18.39,0,0,0,.49-5.32A18.71,18.71,0,0,0,321.85,250.69ZM225.12,256c0-39.95,59.88-39.6,61.76,0C285,295.55,225.12,296,225.12,256Z"

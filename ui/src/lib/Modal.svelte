@@ -27,7 +27,7 @@
 <svelte:window onkeydowncapture={handleKeydown} />
 
 {#if visible}
-  <button transition:fade={{ duration: 150 }} class="bg-black/30 fixed top-0 left-0 w-full h-full z-20" onclick={() => (visible = false)}> </button>
+  <button transition:fade={{ duration: 150 }} class="bg-black/30 fixed top-0 left-0 w-full h-full z-20" aria-label="Close modal" onclick={() => (visible = false)}> </button>
   <div
     transition:scale={{ duration: 500, start: 0.8 }}
     id="popover-default"
