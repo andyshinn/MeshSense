@@ -1,14 +1,20 @@
 {
   "name": "meshsense",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "MeshSense directly connects to your Meshtastic node via Bluetooth or WiFi and continuously provides information to assess the health of your mesh network.",
   "workspaces": [
-    "electron",
+    "ui",
     "api",
-    "ui"
+    "electron"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "format": "biome format",
+    "lint": "biome lint",
+    "check": "biome check",
+    "build": "npm run build --workspaces",
+    "build:mac": "npm run build --workspaces && npm run build:mac -w electron",
+    "build:win": "npm run build --workspaces && npm run build:win -w electron",
+    "build:linux": "npm run build --workspaces && npm run build:linux -w electron"
   },
   "repository": {
     "type": "git",
