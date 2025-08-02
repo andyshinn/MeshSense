@@ -1,0 +1,27 @@
+{
+  "name": "meshsense",
+  "version": "1.0.0",
+  "description": "MeshSense directly connects to your Meshtastic node via Bluetooth or WiFi and continuously provides information to assess the health of your mesh network.",
+  "workspaces": [
+    "electron",
+    "api",
+    "ui"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Affirmatech/MeshSense.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Affirmatech/MeshSense/issues"
+  },
+  "homepage": "https://github.com/Affirmatech/MeshSense",
+  "devDependencies": {
+    "@biomejs/biome": "2.1.3"
+  }
+}
