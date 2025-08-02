@@ -25,11 +25,13 @@ const config = {
   win: {
     artifactName: '${name}' + channelString + '-${arch}.${ext}',
     executableName: 'MeshSense',
-    signingHashAlgorithms: ['sha256'],
-    publisherName: ['Affirmatech Inc.', 'Affirmatech Incorporated'],
     signAndEditExecutable: true,
     verifyUpdateCodeSignature: true,
-    certificateSubjectName: 'Affirmatech Incorporated'
+    signtoolOptions: {
+      signingHashAlgorithms: ['sha256'],
+      publisherName: ['Affirmatech Inc.', 'Affirmatech Incorporated'],
+      certificateSubjectName: 'Affirmatech Incorporated'
+    }
   },
   nsis: {
     artifactName: '${name}' + channelString + '-${arch}.${ext}',
@@ -39,9 +41,6 @@ const config = {
   },
   mac: {
     artifactName: '${name}' + channelString + '-${arch}.${ext}',
-    notarize: {
-      teamId: `${process.env.APPLE_TEAM_ID}`
-    },
     entitlementsInherit: 'build/entitlements.mac.plist',
     extendInfo: [
       {
