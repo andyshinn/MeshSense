@@ -3,6 +3,7 @@ import './lib/persistence'
 import { app, createRoutes, finalize, server } from './lib/server'
 import './meshtastic'
 import { connect, disconnect, deleteNodes, requestPosition, send, traceRoute, setPosition, deviceConfig } from './meshtastic'
+import { scanSerialPorts } from './lib/serial'
 import { address, apiPort, currentTime, apiHostname, accessKey, autoConnectOnStartup, meshSenseNewsDate, allowRemoteMessaging } from './vars'
 import { hostname } from 'os'
 import intercept from 'intercept-stdout'
@@ -103,6 +104,30 @@ createRoutes((app) => {
     console.log('[express]', '/position', req.body)
     setPosition(req.body)
     return res.sendStatus(200)
+  })
+
+  app.get('/serial/ports', async (req, res) => {
+    if (!isAuthorized(req)) return res.sendStatus(403)
+    console.log('[express]', '/serial/ports')
+    try {
+      const ports = await scanSerialPorts()
+      return res.json(ports)
+    } catch (error) {
+      console.error('[express] Error getting serial ports:', error)
+      return res.status(500).json({ error: 'Failed to scan serial ports' })
+    }
+  })
+
+  app.post('/serial/scan', async (req, res) => {
+    if (!isAuthorized(req)) return res.sendStatus(403)
+    console.log('[express]', '/serial/scan')
+    try {
+      const ports = await scanSerialPorts()
+      return res.json(ports)
+    } catch (error) {
+      console.error('[express] Error scanning serial ports:', error)
+      return res.status(500).json({ error: 'Failed to scan serial ports' })
+    }
   })
 
   //** Set accessKey via environment variable */

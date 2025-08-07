@@ -5,6 +5,8 @@
 import { MeshDevice, Protobuf, Types } from '@meshtastic/core'
 import { TransportHTTP } from '@meshtastic/transport-http'
 import { TransportWebBluetooth } from '@meshtastic/transport-web-bluetooth'
+import { TransportWebSerial } from '@meshtastic/transport-web-serial'
+import './lib/web-serial-polyfill'
 import {
   Channel,
   MeshPacket,
@@ -151,10 +153,40 @@ function copy(obj: any) {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
+enum AddressType {
+  BLUETOOTH = 'bluetooth',
+  SERIAL = 'serial',
+  HTTP = 'http',
+  UNKNOWN = 'unknown'
+}
+
+function detectAddressType(address: string): AddressType {
+  if (!address) return AddressType.UNKNOWN
+
+  // Bluetooth MAC address patterns
+  const macPattern = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/
+  const bluetoothIdPattern = /^([^/W]*-){4}[^/W]{12}$/
+
+  // Serial port patterns (common formats)
+  const serialPattern = /^(\/dev\/cu|\/dev\/tty|COM\d+|\/dev\/serial)/i
+
+  // HTTP patterns
+  const httpPattern = /^https?:\/\//i
+
+  if (macPattern.test(address) || bluetoothIdPattern.test(address)) {
+    return AddressType.BLUETOOTH
+  } else if (serialPattern.test(address)) {
+    return AddressType.SERIAL
+  } else if (httpPattern.test(address)) {
+    return AddressType.HTTP
+  }
+
+  return AddressType.UNKNOWN
+}
+
+// Legacy function for backwards compatibility
 function validateMACAddress(macAddress: string): boolean {
-  const pattern = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/
-  const macPattern = /^([^/W]*-){4}[^/W]{12}$/
-  return pattern.test(macAddress) || macPattern.test(macAddress)
+  return detectAddressType(macAddress) === AddressType.BLUETOOTH
 }
 
 function disableReconnect() {
@@ -176,17 +208,7 @@ export async function disconnect(setIntent = true) {
   connectionStatus.set('disconnected')
   if (setIntent) connectionIntended = false
   console.log('Disconnecting from device')
-  if (connection) {
-    disableReconnect()
-    clearTimeout(connectionTimeout)
-    try {
-      await connection.disconnect()
-      console.log('[meshtastic] Connection disconnected successfully')
-    } catch (e) {
-      console.log('[meshtastic] Disconnect error (likely already disconnected):', e.message)
-    }
-  }
-
+  // Clean up transport-specific resources first
   if (transport instanceof TransportWebBluetooth) {
     try {
       for (const [deviceId, device] of Object.entries(bluetoothDevices)) {
@@ -198,11 +220,53 @@ export async function disconnect(setIntent = true) {
       }
     } catch (e) {
       console.log('[meshtastic] GATT disconnect error:', e.message)
-  }
+    }
+  } else if (transport instanceof TransportWebSerial) {
+    try {
+      console.log('[meshtastic] Cleaning up serial transport')
+      
+      // Close the transport streams first to stop the pipe operations
+      try {
+        console.log('[meshtastic] Closing transport toDevice stream')
+        await transport.toDevice.close()
+      } catch (e) {
+        console.log('[meshtastic] toDevice stream already closed:', e.message)
+      }
+
+      // Get the port from the transport and explicitly close it
+      const port = (transport as any).port || (transport as any).connection
+      if (port && typeof port.close === 'function') {
+        console.log('[meshtastic] Explicitly closing serial port')
+        await port.close()
+      }
+
+      // Also ensure all polyfilled ports are closed
+      const navigator = (global as any).navigator
+      if (navigator && navigator.serial && typeof navigator.serial.closeAllPorts === 'function') {
+        console.log('[meshtastic] Closing all polyfilled serial ports')
+        await navigator.serial.closeAllPorts()
+      }
+    } catch (e) {
+      console.log('[meshtastic] Serial transport cleanup error:', e.message)
+    }
   }
 
+  // Clear references first to prevent any new operations
   transport = undefined
+  const oldConnection = connection
   connection = undefined
+
+  // Now disconnect the old connection after clearing references
+  if (oldConnection) {
+    disableReconnect()
+    clearTimeout(connectionTimeout)
+    try {
+      await oldConnection.disconnect()
+      console.log('[meshtastic] Connection disconnected successfully')
+    } catch (e) {
+      console.log('[meshtastic] Disconnect error (likely already disconnected):', e.message)
+    }
+  }
 
   if (setIntent) reset()
 }
@@ -231,7 +295,9 @@ export async function connect(address?: string) {
   if (!address || address == '') return
   currentConnectionAddress = address
 
-  if (validateMACAddress(address)) {
+  const addressType = detectAddressType(address)
+
+  if (addressType === AddressType.BLUETOOTH) {
     /** Bluetooth Device */
     connectionStatus.set('searching')
 
@@ -252,8 +318,27 @@ export async function connect(address?: string) {
       connectionStatus.set('disconnected')
       return
     }
-  } else {
+  } else if (addressType === AddressType.SERIAL) {
+    /** Serial Device */
+    connectionStatus.set('connecting')
+
+    try {
+      console.log('[meshtastic] Creating serial transport for:', address)
+      // Create a polyfilled SerialPort and use the official transport
+      const serialPort = (global as any).navigator.serial.createPortFromPath(address)
+      transport = await TransportWebSerial.createFromPort(serialPort)
+    } catch (error) {
+      console.error('[meshtastic] Failed to create serial transport:', error)
+      connectionStatus.set('disconnected')
+      return
+    }
+  } else if (addressType === AddressType.HTTP) {
+    /** HTTP Device */
     transport = await TransportHTTP.create(address, enableTLS.value)
+  } else {
+    console.error('[meshtastic] Unknown address type for:', address)
+    connectionStatus.set('disconnected')
+    return
   }
 
   // Create MeshDevice with the appropriate transport

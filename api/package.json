@@ -51,7 +51,7 @@
     "intercept-stdout": "^0.1.2",
     "key-file-storage": "^2.3.3",
     "pem": "^1.14.8",
-    "serialport": "^12.0.0",
+    "serialport": "^13.0.0",
     "webbluetooth": "^3.3.2",
     "ws": "^8.18.0",
     "x11": "^2.3.0"

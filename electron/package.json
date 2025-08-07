@@ -23,6 +23,10 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^3.0.0",
+    "@meshtastic/core": "npm:@jsr/meshtastic__core@^2.6.5",
+    "@meshtastic/transport-http": "npm:@jsr/meshtastic__transport-http@^0.2.1",
+    "@meshtastic/transport-web-bluetooth": "npm:@jsr/meshtastic__transport-web-bluetooth@^0.1.2",
+    "@meshtastic/transport-web-serial": "npm:@jsr/meshtastic__transport-web-serial@^0.2.1",
     "env-paths": "^3.0.0",
     "key-file-storage": "^2.3.3"
   },
