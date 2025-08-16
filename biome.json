@@ -14,8 +14,6 @@
       "!**/out",
       "!**/build",
       "!**/resources",
-      "!api/meshtastic-js",
-      "!api/webbluetooth",
       "!**/.vscode",
       "!**/.gitignore"
     ]
