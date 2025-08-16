@@ -2,7 +2,7 @@ name: Electron App
 
 on:
   push:
-    branches: [master]
+    branches: [master, ashinn/combined]
   pull_request:
     branches: [master]
 
