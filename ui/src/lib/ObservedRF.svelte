@@ -1,6 +1,10 @@
 <script lang="ts">
   import type { NodeInfo } from 'api/src/vars'
-  export let node: NodeInfo
+  interface Props {
+    node: NodeInfo;
+  }
+
+  let { node }: Props = $props();
 
   function calculateRFSNRWidthPercentage(snr: number) {
     // calculate a relative width percentage to represent a bar of SNR values

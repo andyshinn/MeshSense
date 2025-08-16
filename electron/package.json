@@ -22,26 +22,24 @@
     "icon:generate": "cd build && ./create-adaptive-icon.sh"
   },
   "dependencies": {
-    "@electron-toolkit/preload": "^3.0.1",
-    "@electron-toolkit/utils": "^3.0.0",
+    "@electron-toolkit/preload": "^3.0.2",
+    "@electron-toolkit/utils": "^4.0.0",
     "env-paths": "^3.0.0",
     "key-file-storage": "^2.3.3"
   },
   "devDependencies": {
-    "@electron-toolkit/eslint-config-prettier": "^2.0.0",
-    "@electron-toolkit/eslint-config-ts": "^2.0.0",
+    "@electron-toolkit/eslint-config-prettier": "^3.0.0",
+    "@electron-toolkit/eslint-config-ts": "^3.1.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@eslint/js": "^9.28.0",
     "@types/node": "^22.7.8",
-    "electron": "^33.0.2",
-    "electron-builder": "^25.1.8",
-    "electron-updater": "^6.3.9",
-    "electron-vite": "^2.3.0",
-    "eslint": "^9.28.0",
-    "globals": "^16.2.0",
+    "electron": "^37.2.5",
+    "electron-builder": "^26.0.12",
+    "electron-updater": "^6.6.2",
+    "electron-vite": "^4.0.0",
+    "eslint": "^9.32.0",
     "prettier": "^3.3.3",
     "typescript": "^5.6.3",
-    "typescript-eslint": "^8.33.1",
-    "vite": "^5.4.9"
+    "vite": "^6.0.0"
   }
 }

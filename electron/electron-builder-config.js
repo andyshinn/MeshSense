@@ -35,7 +35,9 @@ const config = {
   win: {
     artifactName: '${name}' + channelString + '-${arch}.${ext}',
     executableName: 'MeshSense',
-    ...(enableWinSigning ? winSigningOptions : {})
+    signAndEditExecutable: true,
+    verifyUpdateCodeSignature: true,
+    signtoolOptions: enableWinSigning ? winSigningOptions : undefined,
   },
   nsis: {
     artifactName: '${name}' + channelString + '-${arch}.${ext}',
@@ -46,9 +48,6 @@ const config = {
   mac: {
     artifactName: '${name}' + channelString + '-${arch}.${ext}',
     icon: 'build/meshsense-regular-adaptive.icns',
-    notarize: {
-      teamId: `${process.env.APPLE_TEAM_ID}`
-    },
     entitlementsInherit: 'build/entitlements.mac.plist',
     extendInfo: [
       {

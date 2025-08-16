@@ -74,7 +74,10 @@ export default defineConfig({
       ignoreGlobal: true
     }),
     typescript({
-      target: 'esnext'
+      target: 'esnext',
+      compilerOptions: {
+        allowImportingTsExtensions: false
+      }
       // sourceMap: true
     }),
     json()

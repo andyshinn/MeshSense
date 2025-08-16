@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let permissionStatus = window.Notification ? Notification.permission : 'Unsupported'
 
   export function requestPermission() {

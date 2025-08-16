@@ -72,7 +72,7 @@ export class WebSocketHTTPServer extends WebSocketServer {
     })
   }
 
-  processIncomingMessage(message: any, socket: WebSocket.WebSocket) {
+  processIncomingMessage(message: any, socket: WebSocket) {
     try {
       let messageObject: MessageObject = JSON.parse(message)
       console.log('[WSS]', socket['remoteAddress'], messageObject?.data)
@@ -91,7 +91,7 @@ export class WebSocketHTTPServer extends WebSocketServer {
    * - `to` Socket to send data to, otherwise send to all
    * - `skip` Socket to skip
    */
-  send(event: string, data?: any, options: { to?: WebSocket.WebSocket; skip?: WebSocket.WebSocket } = {}) {
+  send(event: string, data?: any, options: { to?: WebSocket; skip?: WebSocket } = {}) {
     let message = JSON.stringify({ event, data })
 
     try {
