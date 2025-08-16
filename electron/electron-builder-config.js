@@ -64,7 +64,8 @@ const config = {
   linux: {
     target: ['AppImage'],
     maintainer: 'electronjs.org',
-    category: 'Utility'
+    category: 'Utility',
+    icon: 'build/icon.png'
   },
   appImage: {
     artifactName: `\${name}${channelString}-\${arch}.\${ext}`
