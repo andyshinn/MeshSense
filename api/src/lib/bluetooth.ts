@@ -1,8 +1,11 @@
 import { TransportWebBluetooth } from "@meshtastic/transport-web-bluetooth"
 import { Bluetooth } from "webbluetooth"
+import { createNodeLogger } from "./logging"
 import { State } from "./state"
 
 export const bluetoothDevices: Record<string, BluetoothDevice> = {}
+
+const logger = createNodeLogger("bluetooth", "api")
 const bluetoothDeviceList = State.create("bluetoothDeviceList", [], { primaryKey: "id", hideLog: true })
 
 let scanning = false
@@ -14,17 +17,17 @@ const bluetooth = new Bluetooth({ scanTime: 10 })
 export async function scanForDevice() {
   if (exitScanning) return
 
-  console.log("[bluetooth] scanning...")
+  logger.info("[bluetooth] scanning...")
 
   try {
     const device: BluetoothDevice | undefined = await bluetooth
       .requestDevice({
         filters: [{ services: [TransportWebBluetooth.ServiceUuid] }],
       })
-      .catch((e) => console.warn(e))
+      .catch((e) => logger.warn(e))
 
     if (device) {
-      console.log("[bluetooth] Device Detected |", device.id, device.name)
+      logger.info("[bluetooth] Device Detected |", device.id, device.name)
       bluetoothDevices[device.id] = device
       const { id, name } = device
       bluetoothDeviceList.upsert({ id, name })
@@ -33,7 +36,7 @@ export async function scanForDevice() {
 
     if (!exitScanning) setTimeout(scanForDevice, 500)
   } catch (e) {
-    console.error("[bluetooth], Error encountered during scan", e)
+    logger.error("[bluetooth], Error encountered during scan", e)
   }
 }
 
@@ -41,10 +44,10 @@ export async function beginScanning(targetId?: string) {
   deviceTargetId = targetId
   delete bluetoothDevices[targetId]
   if (scanning) {
-    console.warn("Already Scanning")
+    logger.warn("Already Scanning")
     return
   }
-  console.log("[bluetooth] Begin Scanning")
+  logger.info("[bluetooth] Begin Scanning")
 
   let adapterAvailable = false
 
@@ -52,10 +55,10 @@ export async function beginScanning(targetId?: string) {
   try {
     adapterAvailable = await bluetooth.getAvailability()
   } catch (e) {
-    console.warn("[bluetooth] Unable to detect Bluetooth adapters")
+    logger.warn("[bluetooth] Unable to detect Bluetooth adapters")
   }
 
-  console.log("[bluetooth] Adapter available:", adapterAvailable)
+  logger.info("[bluetooth] Adapter available:", adapterAvailable)
   if (adapterAvailable) {
     scanning = true
     exitScanning = false
@@ -64,7 +67,7 @@ export async function beginScanning(targetId?: string) {
 }
 
 export function stopScanning() {
-  if (scanning) console.log("[bluetooth] Stop Scanning")
+  if (scanning) logger.info("[bluetooth] Stop Scanning")
   exitScanning = true
   scanning = false
 }

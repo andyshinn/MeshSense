@@ -9,6 +9,7 @@ import axios from "axios"
 import exitHook from "exit-hook"
 import * as geolib from "geolib"
 import { beginScanning, bluetoothDevices, stopScanning } from "./lib/bluetooth"
+import { createNodeLogger } from "./lib/logging"
 import { State } from "./lib/state"
 import {
   address,
@@ -35,8 +36,9 @@ import {
   version,
 } from "./vars"
 
-let routeCache: State<Record<number, number[]>>
+const logger = createNodeLogger("meshtastic", "api")
 
+let routeCache: State<Record<number, number[]>>
 let connection: MeshDevice | undefined
 let transport: Types.Transport | undefined
 let connectionIntended = false
@@ -71,7 +73,7 @@ function sendToMeshMap(updates: Partial<NodeInfo & { name?: string }>, node?: No
   if (connectionStatus.value == "connected" && meshMapForwarding.value) {
     if (packet && packet.from != myNodeNum.value) updates.hopsAway = packet.hopStart - packet.hopLimit
     if (node && node.user?.shortName) updates.name = node.user?.shortName
-    // console.log('MeshMap Send', updates)
+    // logger.info('MeshMap Send', updates)
     axios
       .post(
         meshMapForwardingURL + "/node",
@@ -84,7 +86,7 @@ function sendToMeshMap(updates: Partial<NodeInfo & { name?: string }>, node?: No
         { timeout: 3000 },
       )
       .catch((e) => {
-        console.log(`[meshtastic] Unable to send to ${meshMapForwardingURL}`, String(e), String(e.response?.data) ?? "")
+        logger.info(`[meshtastic] Unable to send to ${meshMapForwardingURL}`, String(e), String(e.response?.data) ?? "")
       })
   }
 }
@@ -94,7 +96,7 @@ function isTracerouteAvailable(nodeNum: number) {
   if (!traceRouteLog[nodeNum]) return true
   const lastTracerouteRelativeTime = Date.now() - traceRouteLog[nodeNum]
   if (lastTracerouteRelativeTime > tracerouteRateLimit.value * 60000) return true
-  console.log(
+  logger.info(
     `[meshtastic] Traceroute to ${nodeNum} already sent ${(lastTracerouteRelativeTime / 60000).toFixed(1)} minutes ago`,
   )
   return false
@@ -104,14 +106,14 @@ function checkForCachedRoute(node: NodeInfo) {
   if (node.trace) return
   const trace = routeCache?.value[node.num]
   if (trace) {
-    console.log("Loading cached route", node.num, trace)
+    logger.info("Loading cached route", node.num, trace)
     node.trace = trace
     traceRouteLog[node.num] = Date.now()
   }
 }
 
 myNodeNum.subscribe((value) => {
-  console.log("Creating route cache for", value)
+  logger.info("Creating route cache for", value)
   if (Number(value) >= 0) {
     routeCache = State.create(`routeCache-${value}`, {}, { persist: true, hideLog: true })
   } else routeCache = undefined
@@ -166,7 +168,7 @@ function validateMACAddress(macAddress: string): boolean {
 
 function disableReconnect() {
   // TODO: Not sure what to do with this. Doesn't seem like there is any autoreconnect feature in meshtastic/core. Maybe this can be removed?
-  console.log("[meshtastic] Preventing Automatic Reconnect")
+  logger.info("[meshtastic] Preventing Automatic Reconnect")
 }
 
 exitHook(() => {
@@ -182,15 +184,15 @@ function extractPayload(packet: MeshPacket): Record<string, any> {
 export async function disconnect(setIntent = true) {
   connectionStatus.set("disconnected")
   if (setIntent) connectionIntended = false
-  console.log("Disconnecting from device")
+  logger.info("Disconnecting from device")
   if (connection) {
     disableReconnect()
     clearTimeout(connectionTimeout)
     try {
       await connection.disconnect()
-      console.log("[meshtastic] Connection disconnected successfully")
+      logger.info("[meshtastic] Connection disconnected successfully")
     } catch (e) {
-      console.log("[meshtastic] Disconnect error (likely already disconnected):", e.message)
+      logger.info("[meshtastic] Disconnect error (likely already disconnected):", e.message)
     }
   }
 
@@ -198,13 +200,13 @@ export async function disconnect(setIntent = true) {
     try {
       for (const [deviceId, device] of Object.entries(bluetoothDevices)) {
         if (device && device.gatt && device.gatt.connected) {
-          console.log("[meshtastic] Disconnecting GATT for device:", deviceId)
+          logger.info("[meshtastic] Disconnecting GATT for device:", deviceId)
           device.gatt.disconnect()
-          console.log("[meshtastic] GATT disconnected successfully")
+          logger.info("[meshtastic] GATT disconnected successfully")
         }
       }
     } catch (e) {
-      console.log("[meshtastic] GATT disconnect error:", e.message)
+      logger.info("[meshtastic] GATT disconnect error:", e.message)
     }
   }
 
@@ -231,7 +233,7 @@ export function reset() {
  * @param {string} address - The IP address or Bluetooth UUID of the MeshTastic Node to connect to.
  */
 export async function connect(address?: string) {
-  console.log("[meshtastic] Calling connect", address)
+  logger.info("[meshtastic] Calling connect", address)
 
   await disconnect(false)
   connectionIntended = true
@@ -257,7 +259,7 @@ export async function connect(address?: string) {
         bluetoothDevices[address],
       )) as undefined as Types.Transport
     } catch (error) {
-      console.error("[meshtastic] Failed to create Bluetooth transport:", error)
+      logger.error("[meshtastic] Failed to create Bluetooth transport:", error)
       connectionStatus.set("disconnected")
       return
     }
@@ -269,7 +271,7 @@ export async function connect(address?: string) {
   try {
     connection = new MeshDevice(transport)
   } catch (error) {
-    console.error("[meshtastic] Failed to create MeshDevice:", error)
+    logger.error("[meshtastic] Failed to create MeshDevice:", error)
     connectionStatus.set("disconnected")
     return
   }
@@ -278,9 +280,9 @@ export async function connect(address?: string) {
   channels.set([])
   updateTimeout()
 
-  console.log("[meshtastic] Setting up device status event handler")
+  logger.info("[meshtastic] Setting up device status event handler")
   connection.events.onDeviceStatus.subscribe(async (e) => {
-    console.log("[meshtastic] Device Status changed:", e, `(${Types.DeviceStatusEnum[e]})`)
+    logger.info("[meshtastic] Device Status changed:", e, `(${Types.DeviceStatusEnum[e]})`)
     if (e === Types.DeviceStatusEnum.DeviceConfiguring) {
       connectionStatus.set("configuring")
     } else if (e === Types.DeviceStatusEnum.DeviceConnecting) {
@@ -292,7 +294,7 @@ export async function connect(address?: string) {
       connectionStatus.set("reconnecting")
       // await disconnect()
     } else if (e === Types.DeviceStatusEnum.DeviceDisconnected) {
-      console.log("Connection Intended", connectionIntended)
+      logger.info("Connection Intended", connectionIntended)
       if (connectionIntended) {
         connectionStatus.set("reconnecting")
         connect(currentConnectionAddress)
@@ -461,7 +463,7 @@ export async function connect(address?: string) {
     clearTimeout(connectionTimeout)
     connectionTimeout = setTimeout(() => {
       if (connectionStatus.value != "connected") {
-        console.log("[meshtastic]", "No recent data from device, assuming disconnected")
+        logger.info("[meshtastic]", "No recent data from device, assuming disconnected")
         disconnect(false)
       }
     }, 120000)
@@ -519,22 +521,22 @@ export async function connect(address?: string) {
   })
 
   // Attempt to connect to the specified MeshTastic Node
-  console.log(
+  logger.info(
     "[meshtastic] Connecting to Node",
     address,
     transport instanceof TransportWebBluetooth ? "via Bluetooth" : "via IP",
   )
   if (transport instanceof TransportWebBluetooth) {
-    console.log("[meshtastic] Bluetooth transport ready")
+    logger.info("[meshtastic] Bluetooth transport ready")
   } else {
     process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"
-    console.log("[meshtastic] HTTP transport ready for", address)
+    logger.info("[meshtastic] HTTP transport ready for", address)
   }
 
   try {
     await connection.configure()
   } catch (error) {
-    console.error("[meshtastic] Failed to send configuration request:", error)
+    logger.error("[meshtastic] Failed to send configuration request:", error)
     connectionStatus.set("disconnected")
     return
   }
@@ -545,7 +547,7 @@ export async function connect(address?: string) {
       try {
         await bluetoothDevice.gatt.connect()
       } catch (error) {
-        console.error("[meshtastic] Failed to reconnect GATT:", error)
+        logger.error("[meshtastic] Failed to reconnect GATT:", error)
         connectionStatus.set("disconnected")
         return
       }
@@ -554,7 +556,7 @@ export async function connect(address?: string) {
 
   setTimeout(() => {
     if (connectionStatus.value === "connecting") {
-      console.log("[meshtastic] Connection timeout - still in connecting state after 10 seconds")
+      logger.info("[meshtastic] Connection timeout - still in connecting state after 10 seconds")
     }
   }, 10000) // 10 second timeout
 }
@@ -562,7 +564,7 @@ export async function connect(address?: string) {
 export async function send({ message = "", destination, channel, wantAck = true }) {
   if (connectionStatus.value != "connected" || !message) return
   message = `${messagePrefix.value || ""} ${message} ${messageSuffix.value || ""}`.trim()
-  console.log("Sending", { message, destination, channel, wantAck })
+  logger.info("Sending", { message, destination, channel, wantAck })
   return connection.sendText(message, destination, wantAck, channel)
 }
 
@@ -578,7 +580,7 @@ let queueProcessing = false
 async function processTraceRoutes() {
   queueProcessing = true
   const destination = pendingTraceroutes.value[0]
-  console.log("[meshtastic] Sending Traceroute for", destination)
+  logger.info("[meshtastic] Sending Traceroute for", destination)
   packets.push({
     from: myNodeNum.value,
     to: destination,
@@ -598,7 +600,7 @@ async function processTraceRoutes() {
 }
 
 export async function requestPosition(destination: number) {
-  console.log("[Meshtastic] Requesting Position for", destination)
+  logger.info("[Meshtastic] Requesting Position for", destination)
   return connection.requestPosition(destination)
 }
 
@@ -612,7 +614,7 @@ export async function deleteNodes(nodeList: NodeInfo[]) {
       nodes.delete(node)
     }
   } catch (e) {
-    console.error(e)
+    logger.error(e)
   }
   deleteInProgress = false
 }
@@ -636,7 +638,7 @@ export function getApproximatePosition(num: number) {
   }
 
   // Average out all possible coordinates
-  console.log("[meshtastic] Approximate Location for", num, possibleCoordinates)
+  logger.info("[meshtastic] Approximate Location for", num, possibleCoordinates)
   const center = geolib.getCenter(possibleCoordinates)
   return center
 }
@@ -654,7 +656,7 @@ export function estimatePositionFromTrace(num: number, trace: NodeInfo[]) {
 
   let startNode: any, endNode: any
 
-  // console.log(
+  // logger.info(
   //   'Got trace',
   //   trace.map((n) => n?.num)
   // )
@@ -668,7 +670,7 @@ export function estimatePositionFromTrace(num: number, trace: NodeInfo[]) {
     }
   }
 
-  // console.log('startNode', startNode?.node?.num, startNode?.distance, getNodeCoordinates(startNode?.node))
+  // logger.info('startNode', startNode?.node?.num, startNode?.distance, getNodeCoordinates(startNode?.node))
   if (!startNode) return false
 
   for (let index = indexOfTarget + 1; index <= trace.length; index++) {
@@ -681,7 +683,7 @@ export function estimatePositionFromTrace(num: number, trace: NodeInfo[]) {
     }
   }
 
-  // console.log('endNode', endNode?.node?.num, endNode?.distance, getNodeCoordinates(endNode?.node))
+  // logger.info('endNode', endNode?.node?.num, endNode?.distance, getNodeCoordinates(endNode?.node))
   if (!endNode) return false
 
   // Weight calculation if there are intermediary nodes without a known position
@@ -713,12 +715,12 @@ export async function setPosition(position: Position) {
       gpsMode: gpsModes[deviceConfig["position"]?.gpsMode],
       fixedPosition: false,
     }
-    console.log("Sending Config Position", value)
+    logger.info("Sending Config Position", value)
     connection.setConfig({ payloadVariant: { case: "position", value } } as Protobuf.Config.Config)
   }
 
   await sleep(500)
-  console.log("Sending Position", position)
+  logger.info("Sending Position", position)
   connection.setPosition({ $typeName: "meshtastic.Position", ...position })
 
   await sleep(500)
@@ -728,7 +730,7 @@ export async function setPosition(position: Position) {
       gpsMode: gpsModes[deviceConfig["position"]?.gpsMode],
       fixedPosition: true,
     }
-    console.log("Sending Config Position", value)
+    logger.info("Sending Config Position", value)
     connection.setConfig({ payloadVariant: { case: "position", value } } as Protobuf.Config.Config)
   }
 
@@ -737,13 +739,13 @@ export async function setPosition(position: Position) {
 
 /** This is currently clearing position */
 export async function setTime(seconds?: number) {
-  // console.log('[meshtastic]', 'Updating Device Time')
+  // logger.info('[meshtastic]', 'Updating Device Time')
   // return connection.setPosition(new Protobuf.Mesh.Position({ time: seconds }))
 }
 
 export async function setChannel(channel: Channel) {
   if (channel?.index == undefined) return
-  console.log("Updating Channel", channel.index, channel)
+  logger.info("Updating Channel", channel.index, channel)
   const data = copy(channel)
   data.role = channelRoles[channel.role] ?? channel.role
   data.settings.psk = Buffer.from(channel.settings.psk, "base64")

@@ -8,23 +8,28 @@
         --color-slate-600: oklch(44.6% .043 257.281);
         --color-blue-950: oklch(28.2% .091 267.935);
       }
-      
+
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
-      
-      body, html {
+
+      html {
+        height: 100%;
+        background: linear-gradient(to bottom right, var(--color-slate-600), var(--color-blue-950));
+      }
+
+      body {
         height: 100%;
         font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
         color: white;
-        background: linear-gradient(to bottom right, var(--color-slate-600), var(--color-blue-950));
+        background: transparent;
         display: flex;
         align-items: center;
         justify-content: center;
       }
-      
+
       .loading-text {
         font-size: 2rem;
         font-weight: 300;

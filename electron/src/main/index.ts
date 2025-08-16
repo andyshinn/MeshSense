@@ -1,10 +1,13 @@
 import { electronApp, optimizer } from "@electron-toolkit/utils"
+import { createLogger } from "api/src/lib/logging"
 import { spawn } from "child_process"
 import { app, BrowserWindow, ipcMain, shell, utilityProcess } from "electron"
 import { autoUpdater } from "electron-updater"
-import { join } from "path"
 import { buildMenu } from "./menu"
 import { getWindowState, saveWindowState } from "./window"
+import { join } from "node:path"
+
+const logger = createLogger("electron", "electron")
 
 process.on("uncaughtException", (error: any) => {
   // Ignore EIO errors during shutdown, these are expected when child processes are exiting
@@ -12,7 +15,7 @@ process.on("uncaughtException", (error: any) => {
     return
   }
 
-  console.error("[electron] Uncaught Exception:", error)
+  logger.error("[electron] Uncaught Exception:", error)
   process.exit(10) // Using an unambiguous exit code here to indicate a crash
 })
 
@@ -22,7 +25,7 @@ let mainWindow: BrowserWindow
 
 /** asnyc needed for updateCheckLoop to allow electron to launch main window */
 async function updateCheckLoop() {
-  console.log("[electron] Checking for updates on channel", autoUpdater.channel)
+  logger.info("[electron] Checking for updates on channel", autoUpdater.channel)
   autoUpdater.checkForUpdates()
   setInterval(() => {
     autoUpdater.checkForUpdates()
@@ -80,39 +83,29 @@ function createWindow(): void {
   // }
 
   // This is a simple splash screen with our loading message
-  mainWindow.loadFile(join(__dirname, "../renderer/index.html"))
+  mainWindow.loadFile(join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`))
 }
 
 function startApiServer() {
   const apiPath = join(process.resourcesPath, "api/index.cjs")
-  console.log("[electron] Starting bundled API server in API_PATH: ", apiPath)
+  logger.info("[electron] Starting bundled API server in API_PATH: ", apiPath)
   apiProcess = utilityProcess.fork(apiPath, process.argv, { stdio: "pipe" })
   apiProcess.stdout?.on("data", (e: any) => process.stdout.write(e))
   apiProcess.stderr?.on("data", (e: any) => process.stderr.write(e))
 
   apiProcess.on("exit", (code: any) => {
-    console.log("API PROCESS EXITED!", code)
+    logger.warn("API process has exited with code: ", code)
     app.exit(code)
   })
-}
-
-function createWindowOnServerListening(e: any) {
-  if (String(e).startsWith("Server listening")) {
-    apiPort = String(e).match(/port: (?<port>\d*)/)?.groups?.["port"]
-    console.log("[electron] Loading API")
-    apiProcess.stdout?.removeListener("data", createWindowOnServerListening)
-    // Switch from splash screen to API
-    mainWindow.loadURL(`http://localhost:${apiPort}`)
-  }
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  console.log(`DIRNAME`, __dirname)
+  logger.info(`DIRNAME`, __dirname)
 
-  console.log("[electron] Arguments", process.argv)
+  logger.info("[electron] Arguments", process.argv)
   const headless = process.argv.includes("--headless")
 
   if (!headless) {
@@ -121,16 +114,12 @@ app.whenReady().then(async () => {
 
   if (process.env.DEV_API_URL) {
     // Development mode - use external API server
-    console.log("[electron] Using external API server:", process.env.DEV_API_URL)
+    logger.info("[electron] Using external API server:", process.env.DEV_API_URL)
     if (!headless) {
       mainWindow.loadURL(process.env.DEV_API_URL!)
     }
   } else {
     startApiServer()
-
-    if (!headless) {
-      apiProcess.stdout?.on("data", createWindowOnServerListening)
-    }
   }
   if (apiProcess) {
     apiProcess.postMessage({ event: "version", body: app.getVersion() })
@@ -138,14 +127,21 @@ app.whenReady().then(async () => {
     // apiProcess.postMessage({ event: 'updateChannel', body: autoUpdater.channel })
 
     apiProcess.on("message", (e: any) => {
-      console.log("[api to electron]", e)
+      logger.debug("[api to electron]", e)
       if (e.event == "installUpdate") {
         autoUpdater.autoRunAppAfterInstall = !headless
         autoUpdater.quitAndInstall()
       } else if (e.event == "checkUpdate") autoUpdater.checkForUpdates()
       else if (e.event == "setUpdateChannel") {
-        console.log("[electron] Set update channel", e.body)
+        logger.info("[electron] Set update channel", e.body)
         autoUpdater.channel = e.body
+      } else if (e.event == "server-ready") {
+        apiPort = e.body.port
+        logger.info("API server is ready on port", apiPort)
+        if (!headless) {
+          logger.debug("We are not running headless so loading main window URL")
+          mainWindow.loadURL(`http://localhost:${apiPort}`)
+        }
       }
     })
   }
@@ -181,7 +177,7 @@ app.whenReady().then(async () => {
   })
 
   // IPC test
-  ipcMain.on("ping", () => console.log("pong"))
+  ipcMain.on("ping", () => logger.info("pong"))
 
   // createWindow()
 

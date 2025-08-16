@@ -1,4 +1,8 @@
 <script module lang="ts">
+import { createLogger } from "./logging"
+
+const logger = createLogger("service-worker")
+
 let permissionStatus = window.Notification ? Notification.permission : "Unsupported"
 
 export function requestPermission() {
@@ -25,10 +29,10 @@ const registerServiceWorker = async () => {
     navigator.serviceWorker
       .register(`${import.meta.env.VITE_PATH || ""}/sw.js`)
       .then((registration) => {
-        console.log("Service worker registration successful:", registration)
+        logger.info("Service worker registration successful:", registration)
       })
       .catch((error) => {
-        console.warn("Service worker registration failed:", error)
+        logger.warn("Service worker registration failed:", error)
       })
   }
 }

@@ -2,7 +2,9 @@ import envPaths from "env-paths"
 import { existsSync, fstat, mkdirSync } from "fs"
 import { dirname, join, sep } from "path"
 import url from "url"
+import { createNodeLogger } from "./logging"
 
+const logger = createNodeLogger("paths", "api")
 const userPaths = envPaths("meshsense", { suffix: "" })
 const __filename = url.fileURLToPath(import.meta.url)
 
@@ -16,4 +18,4 @@ if (!existsSync(dataDirectory)) {
   mkdirSync(dataDirectory, { recursive: true })
 }
 
-console.log({ programDirectory, staticDirectory, dataDirectory })
+logger.info({ programDirectory, staticDirectory, dataDirectory })

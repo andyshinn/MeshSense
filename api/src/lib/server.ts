@@ -6,26 +6,29 @@ import type { IncomingMessage, Server, ServerResponse } from "http"
 // import pem from 'pem'
 // import { store } from './persistence'
 import { createProxyMiddleware } from "http-proxy-middleware"
+import { createNodeLogger } from "./logging"
 import { staticDirectory } from "./paths"
 import { State } from "./state"
 import { WebSocketHTTPServer } from "./wss"
+
+const logger = createNodeLogger("server", "api")
 
 // async function createCertificate(options: pem.CertificateCreationOptions, originalKeys?: any): Promise<pem.CertificateCreationResult> {
 //   return new Promise((success, fail) => {
 //     if (originalKeys) {
 //       pem.checkCertificate(originalKeys?.certificate || {}, (error, valid) => {
 //         if (error || !valid) {
-//           console.log('Creating updated Self-Signed Certificate')
+//           logger.info('Creating updated Self-Signed Certificate')
 //           pem.createCertificate(options, (error, keys) => {
 //             if (error) return fail(error)
 //             success(keys)
 //           })
 //         }
-//         console.log('Current Certificate is valid')
+//         logger.info('Current Certificate is valid')
 //         return success(originalKeys)
 //       })
 //     } else {
-//       console.log('Creating new Self-Signed Certificate')
+//       logger.info('Creating new Self-Signed Certificate')
 //       pem.createCertificate(options, (error, keys) => {
 //         if (error) return fail(error)
 //         success(keys)
@@ -45,7 +48,7 @@ import { WebSocketHTTPServer } from "./wss"
 // export let server = httpsServer.listen(Number(process.env.PORT) || 5920)
 
 process.on("unhandledRejection", (reason, promise) => {
-  console.error(String(reason))
+  logger.error(String(reason))
 })
 
 export const version = State.create("version", "")
@@ -103,7 +106,7 @@ async function initSever() {
   const parentPort = process["parentPort"]
 
   parentPort?.on("message", (e: any) => {
-    console.log("[electron to api]", e)
+    logger.debug("Received from Electron: ", e)
     if (e.data.event == "version") {
       version.set(e.data.body)
     } else if (e.data.event == "headless") {
@@ -140,13 +143,26 @@ export async function createRoutes(callback: (app: Express) => void) {
 /** Enable user interface and error-handling (Should be after routes!) */
 export function finalize() {
   app.use((err, _req, res, _next) => {
-    console.error("Error", err)
+    logger.error("Error", err)
     wss.send("error", String(err))
     return res.status(500).json(String(err))
   })
 
   "DEV_UI_URL" in process.env ? enableDevProxy() : app.use(express.static(staticDirectory))
-  console.log("Server listening", server.address())
+  logger.info("Server listening", server.address())
+
+  const parentPort = process["parentPort"]
+  if (parentPort) {
+    const serverAddress = server.address() as any
+    parentPort.postMessage({
+      event: "server-ready",
+      body: {
+        port: serverAddress?.port,
+        address: serverAddress?.address,
+        family: serverAddress?.family,
+      },
+    })
+  }
 }
 
 export default { app, server, wss, finalize }

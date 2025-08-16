@@ -1,4 +1,8 @@
 import EventEmitter from "eventemitter3"
+import { createLogger } from "./logging"
+
+// UI and Electron use state.ts so we cannot use createNodeLogger since it looks at process.env
+const logger = createLogger("state", "api")
 
 type ValueCallback<T> = (value: T, state: State<T>) => void
 type ActionCallback<T> = (params: { state: State<T>; action?: string; args?: any[] }) => void
@@ -171,5 +175,5 @@ export class State<T = any> {
 }
 
 State.subscribe(({ state, action, args }) => {
-  if (!state.flags.hideLog) console.log("[State]", state.name, action, ...args)
+  if (!state.flags.hideLog) logger.debug("[State]", state.name, action, ...args)
 })

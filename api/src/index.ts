@@ -7,6 +7,7 @@ import { createWriteStream } from "fs"
 import intercept from "intercept-stdout"
 import { hostname } from "os"
 import { join } from "path"
+import { createNodeLogger } from "./lib/logging"
 import { dataDirectory } from "./lib/paths"
 import {
   connect,
@@ -29,10 +30,12 @@ import {
   meshSenseNewsDate,
 } from "./vars"
 
+const logger = createNodeLogger("api", "api")
+
 setInterval(() => currentTime.set(Date.now()), 15000)
 
 process.on("uncaughtException", (err, origin) => {
-  console.error("[system] Uncaught Exception", err)
+  logger.error("[system] Uncaught Exception", err)
 })
 
 const consoleLog = []
@@ -56,7 +59,7 @@ intercept(
 
 function isAuthorized(req: { headers: Record<string, string | undefined>; socket: { remoteAddress: string } }) {
   const token = req.headers["authorization"]?.split(" ")[1]
-  console.log("Remote Address", req.socket.remoteAddress)
+  logger.info("Remote Address", req.socket.remoteAddress)
   return (
     req.socket.remoteAddress.includes("127.0.0.1") ||
     req.socket.remoteAddress.includes("ffff") ||
@@ -97,14 +100,14 @@ createRoutes((app) => {
 
   app.post("/connect", async (req, res) => {
     if (!isAuthorized(req)) return res.sendStatus(403)
-    console.log("[express]", "/connect")
+    logger.info("[express]", "/connect")
     connect(req.body.address || address.value)
     return res.sendStatus(200)
   })
 
   app.post("/disconnect", async (req, res) => {
     if (!isAuthorized(req)) return res.sendStatus(403)
-    console.log("[express]", "/disconnect")
+    logger.info("[express]", "/disconnect")
     disconnect()
     return res.sendStatus(200)
   })
@@ -121,7 +124,7 @@ createRoutes((app) => {
 
   app.post("/position", async (req, res) => {
     if (!isAuthorized(req)) return res.sendStatus(403)
-    console.log("[express]", "/position", req.body)
+    logger.info("[express]", "/position", req.body)
     setPosition(req.body)
     return res.sendStatus(200)
   })
@@ -141,7 +144,7 @@ createRoutes((app) => {
 
   // ** Check News Update */
   function checkForNews() {
-    console.log("[news] Checking for news")
+    logger.info("[news] Checking for news")
     axios
       .get("https://affirmatech.com/meshSenseNewsDate")
       .then((newDate) => {
@@ -150,7 +153,7 @@ createRoutes((app) => {
         }
       })
       .catch(() => {
-        console.log("[news] Unable to get latest news")
+        logger.info("[news] Unable to get latest news")
       })
   }
 

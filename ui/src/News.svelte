@@ -10,10 +10,14 @@ export let lastViewedNewsDate = Number(localStorage.getItem("lastViewedNewsDate"
 
   import Modal from './lib/Modal.svelte'
   import { meshSenseNewsDate } from 'api/src/vars'
-  console.log({ lastViewedNewsDate })
+  import { createLogger } from 'api/src/lib/logging'
+
+  const logger = createLogger('news')
+
+  logger.debug({ lastViewedNewsDate })
   run(() => {
     if (lastViewedNewsDate < $meshSenseNewsDate) {
-      console.log({ lastViewedNewsDate, $meshSenseNewsDate })
+      logger.debug({ lastViewedNewsDate, $meshSenseNewsDate })
       newsVisible.set(true)
       lastViewedNewsDate = $meshSenseNewsDate
       localStorage.setItem('lastViewedNewsDate', String($meshSenseNewsDate))

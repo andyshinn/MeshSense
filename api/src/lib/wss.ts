@@ -2,6 +2,9 @@ import EventEmitter from "eventemitter3"
 import type { IncomingMessage, Server } from "http"
 import { parse } from "url"
 import WebSocket, { WebSocketServer } from "ws"
+import { createNodeLogger } from "./logging"
+
+const logger = createNodeLogger("wss", "api")
 
 export interface MessageObject {
   event?: string
@@ -44,7 +47,7 @@ export class WebSocketHTTPServer extends WebSocketServer {
 
       remoteAddress = remoteAddress + ":" + request.socket["_peername"]?.port
 
-      console.log("[WSS]", `Connection from ${remoteAddress}`)
+      logger.info("[WSS]", `Connection from ${remoteAddress}`)
       socket["remoteAddress"] = remoteAddress
 
       socket.on("message", (message) => {
@@ -78,14 +81,14 @@ export class WebSocketHTTPServer extends WebSocketServer {
   processIncomingMessage(message: WebSocket.RawData, socket: WebSocket) {
     try {
       const messageObject: MessageObject = JSON.parse(message)
-      console.log("[WSS]", socket["remoteAddress"], messageObject?.data)
+      logger.info("[WSS]", socket["remoteAddress"], messageObject?.data)
       try {
         if (messageObject.event) this.msg.emit(messageObject.event, messageObject.data, socket)
       } catch (e) {
-        console.log(`Unable to process event ${messageObject.event} | ${e}`)
+        logger.error(`Unable to process event ${messageObject.event} | ${e}`)
       }
     } catch (e) {
-      console.log(`Unable to parse data | ${e}`)
+      logger.error(`Unable to parse data | ${e}`)
     }
   }
 
@@ -105,7 +108,7 @@ export class WebSocketHTTPServer extends WebSocketServer {
         })
       }
     } catch (e) {
-      console.log(`Unable to send data | ${e}`)
+      logger.error(`Unable to send data | ${e}`)
     }
   }
 }

@@ -15,7 +15,8 @@
       "!**/build",
       "!**/resources",
       "!**/.vscode",
-      "!**/.gitignore"
+      "!**/.gitignore",
+      "!**/.vite"
     ]
   },
   "formatter": {

@@ -1,8 +1,11 @@
+import { createLogger } from "api/src/lib/logging"
 import { accessKey, apiHostname, broadcastId, lastFromRadio, type NodeInfo, nodes, packets } from "api/src/vars"
 import axios from "axios"
 import { tick } from "svelte"
 import { derived, get, writable } from "svelte/store"
 import { enableAudioAlerts } from "../Settings.svelte"
+
+const logger = createLogger("util")
 
 export let blockUserKey = writable(false)
 export const userKey = writable(localStorage.getItem("userKey") || "")
@@ -108,7 +111,7 @@ export function setPosition(latitude: number, longitude: number) {
   let latitudeI = Math.round(latitude * 10000000)
   let longitudeI = Math.round(longitude * 10000000)
   let position = { latitudeI, longitudeI }
-  console.log("Updating position", position)
+  logger.info("Updating position", position)
   axios.post("/position", position, { timeout: 3000 })
 }
 

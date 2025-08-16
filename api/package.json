@@ -53,6 +53,7 @@
     "key-file-storage": "^2.3.3",
     "pem": "^1.14.8",
     "serialport": "^13.0.0",
+    "tslog": "^4.9.3",
     "webbluetooth": "^3.3.2",
     "ws": "^8.18.0",
     "x11": "^2.3.0"

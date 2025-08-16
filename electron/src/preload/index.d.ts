@@ -6,6 +6,10 @@ declare global {
       }
       process: {
         versions: NodeJS.ProcessVersions
+        env: {
+          MESHSENSE_LOG_LEVEL?: string
+          NODE_ENV?: string
+        }
       }
     }
     api: {

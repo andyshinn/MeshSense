@@ -7,6 +7,10 @@ const electronAPI = {
   },
   process: {
     versions: process.versions,
+    env: {
+      MESHSENSE_LOG_LEVEL: process.env.MESHSENSE_LOG_LEVEL,
+      NODE_ENV: process.env.NODE_ENV,
+    },
   },
 }
 
