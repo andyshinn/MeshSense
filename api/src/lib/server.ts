@@ -8,7 +8,7 @@ import { State } from './state'
 import { createProxyMiddleware } from 'http-proxy-middleware'
 import { staticDirectory } from './paths'
 import getPort from 'get-port'
-import type { IncomingMessage, Server, ServerResponse } from 'node:http'
+import { IncomingMessage, Server, ServerResponse } from 'http'
 
 // async function createCertificate(options: pem.CertificateCreationOptions, originalKeys?: any): Promise<pem.CertificateCreationResult> {
 //   return new Promise((success, fail) => {
@@ -44,16 +44,16 @@ import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 // let httpsServer = https.createServer({ key: keys.serviceKey, cert: keys.certificate }, app)
 // export let server = httpsServer.listen(Number(process.env.PORT) || 5920)
 
-process.on('unhandledRejection', (reason, _promise) => {
+process.on('unhandledRejection', (reason, promise) => {
   console.error(String(reason))
 })
 
-export const version = new State('version', '')
-export const headless = new State('headless', '')
-export const updateChannel = new State('updateChannel', undefined, { persist: true })
-export const updateStatus = new State('updateStatus', {})
+export let version = new State('version', '')
+export let headless = new State('headless', '')
+export let updateChannel = new State('updateChannel', undefined, { persist: true })
+export let updateStatus = new State('updateStatus', {})
 
-export const app: Express = express()
+export let app: Express = express()
 app.use(express.json({ limit: '500mb' }))
 
 export let server: Server<typeof IncomingMessage, typeof ServerResponse>
@@ -79,7 +79,7 @@ async function initSever() {
   })
 
   // Enable CORS (https://stackoverflow.com/a/18311469)
-  app.use((_req, res, next) => {
+  app.use(function (req, res, next) {
     // Website you wish to allow to connect
     res.setHeader('Access-Control-Allow-Origin', '*')
 
@@ -104,11 +104,11 @@ async function initSever() {
 
   parentPort?.on('message', (e: any) => {
     console.log('[electron to api]', e)
-    if (e.data.event === 'version') {
+    if (e.data.event == 'version') {
       version.set(e.data.body)
-    } else if (e.data.event === 'headless') {
+    } else if (e.data.event == 'headless') {
       headless.set(e.data.body)
-    } else if (e.data.event === 'updateChannel') {
+    } else if (e.data.event == 'updateChannel') {
       if (e.data.body) updateChannel.set(e.data.body)
     } else if (['update-available', 'download-progress', 'update-downloaded'].includes(e.data.event)) {
       updateStatus.set(e.data)
@@ -120,12 +120,12 @@ async function initSever() {
     parentPort?.postMessage({ event: 'setUpdateChannel', body: v })
   })
 
-  app.get('/installUpdate', (_req, res) => {
+  app.get('/installUpdate', (req, res) => {
     parentPort?.postMessage({ event: 'installUpdate' })
     res.sendStatus(200)
   })
 
-  app.get('/checkUpdate', (_req, res) => {
+  app.get('/checkUpdate', (req, res) => {
     parentPort?.postMessage({ event: 'checkUpdate' })
     res.sendStatus(200)
   })
@@ -153,7 +153,7 @@ export default { app, server, wss, finalize }
 
 /** When in development, proxy UI route instead of serving static files */
 function enableDevProxy() {
-  const wsProxy = createProxyMiddleware({
+  let wsProxy = createProxyMiddleware({
     target: process.env.DEV_UI_URL,
     changeOrigin: true,
     ws: true

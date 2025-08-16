@@ -1,25 +1,25 @@
 import 'dotenv/config'
 import './lib/persistence'
-import { createRoutes, server } from './lib/server'
+import { app, createRoutes, finalize, server } from './lib/server'
 import './meshtastic'
 import { connect, disconnect, deleteNodes, requestPosition, send, traceRoute, setPosition, deviceConfig } from './meshtastic'
 import { address, apiPort, currentTime, apiHostname, accessKey, autoConnectOnStartup, meshSenseNewsDate, allowRemoteMessaging } from './vars'
-import { hostname } from 'node:os'
+import { hostname } from 'os'
 import intercept from 'intercept-stdout'
-import { createWriteStream } from 'node:fs'
+import { createWriteStream } from 'fs'
 import { dataDirectory } from './lib/paths'
-import { join } from 'node:path'
+import { join } from 'path'
 import axios from 'axios'
 setInterval(() => currentTime.set(Date.now()), 15000)
 
-process.on('uncaughtException', (err, _origin) => {
+process.on('uncaughtException', (err, origin) => {
   console.error('[system] Uncaught Exception', err)
 })
 
-const consoleLog = []
-const logSize = 1000
+let consoleLog = []
+let logSize = 1000
 
-const lastLogStream = createWriteStream(join(dataDirectory, 'lastLog.txt'))
+let lastLogStream = createWriteStream(join(dataDirectory, 'lastLog.txt'))
 intercept(
   (text) => {
     lastLogStream.write(text)
@@ -34,43 +34,43 @@ intercept(
 )
 
 function isAuthorized(req: any) {
-  const token = req.headers.authorization?.split(' ')[1]
+  let token = req.headers['authorization']?.split(' ')[1]
   console.log('Remote Address', req.socket.remoteAddress)
   return (
     req.socket.remoteAddress.includes('127.0.0.1') ||
     req.socket.remoteAddress.includes('ffff') ||
     req.socket.remoteAddress.includes('localhost') ||
     req.socket.remoteAddress.includes('::1') ||
-    (accessKey.value !== '' && accessKey.value === token)
+    (accessKey.value != '' && accessKey.value == token)
   )
 }
 
 createRoutes((app) => {
   app.post('/send', (req, res) => {
     if (!allowRemoteMessaging.value && !isAuthorized(req)) return res.sendStatus(403)
-    const message = req.body.message
-    const destination = req.body.destination
-    const channel = req.body.channel
-    const wantAck = req.body.wantAck
+    let message = req.body.message
+    let destination = req.body.destination
+    let channel = req.body.channel
+    let wantAck = req.body.wantAck
     send({ message, destination, channel, wantAck })
     return res.sendStatus(200)
   })
 
   app.post('/traceRoute', async (req, res) => {
-    const destination = req.body.destination
+    let destination = req.body.destination
     await traceRoute(destination)
     return res.sendStatus(200)
   })
 
   app.post('/requestPosition', async (req, res) => {
-    const destination = req.body.destination
+    let destination = req.body.destination
     await requestPosition(destination)
     return res.sendStatus(200)
   })
 
   app.post('/deleteNodes', async (req, res) => {
     if (!isAuthorized(req)) return res.sendStatus(403)
-    const nodes = req.body.nodes
+    let nodes = req.body.nodes
     await deleteNodes(nodes)
   })
 
@@ -89,12 +89,12 @@ createRoutes((app) => {
   })
 
   app.get('/consoleLog', async (req, res) => {
-    if (req.query.accessKey !== accessKey.value && req.hostname.toLowerCase() !== 'localhost') return res.sendStatus(403)
+    if (req.query.accessKey != accessKey.value && req.hostname.toLowerCase() != 'localhost') return res.sendStatus(403)
     return res.json(consoleLog)
   })
 
   app.get('/deviceConfig', async (req, res) => {
-    if (req.query.accessKey !== accessKey.value && req.hostname.toLowerCase() !== 'localhost') return res.sendStatus(403)
+    if (req.query.accessKey != accessKey.value && req.hostname.toLowerCase() != 'localhost') return res.sendStatus(403)
     return res.json(deviceConfig)
   })
 

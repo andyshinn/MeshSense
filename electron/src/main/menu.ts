@@ -71,7 +71,7 @@ export function buildMenu() {
       role: 'help',
       submenu: [
         {
-          label: `Version: ${app.getVersion()}`,
+          label: 'Version: ' + app.getVersion(),
 
         }
       ]

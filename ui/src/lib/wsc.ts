@@ -1,7 +1,7 @@
 import { State } from 'api/src/lib/state'
 import EventEmitter from 'eventemitter3'
 
-export const events = new EventEmitter()
+export let events = new EventEmitter()
 events.on('error', (e) => console.error(e))
 
 interface MessageObject {
@@ -9,12 +9,12 @@ interface MessageObject {
   data: any
 }
 
-export const defaultEndpoint: string = `${document.URL.replace('http', 'ws').replace(/\?.*/, '')}api`
+export let defaultEndpoint: string = document.URL.replace('http', 'ws').replace(/\?.*/, '') + 'api'
 export let socket: WebSocket | undefined = undefined
 export let status: 'Ready' | 'Connecting' | 'Connected' | 'Disconnected' | 'Closed' = 'Ready'
 
-const pendingMessages: MessageObject[] = []
-let _reconnectTimeout: number
+let pendingMessages: MessageObject[] = []
+let reconnectTimeout: number
 
 export class WebSocketClient {
   constructor(endpoint?: string, syncStates = true) {
@@ -35,7 +35,7 @@ export class WebSocketClient {
       events.on('initState', (stateData) => {
         State.defaults = stateData
         if (stateData) console.log('[ws] Received current state')
-        for (const [name, value] of Object.entries(stateData)) {
+        for (let [name, value] of Object.entries(stateData)) {
           setState(name, 'set', [value])
         }
       })
@@ -50,17 +50,17 @@ export class WebSocketClient {
       console.log(`Connecting to ${endpoint}`)
       socket = new WebSocket(endpoint)
 
-      socket.onclose = (_e) => {
+      socket.onclose = (e) => {
         console.log(`Connection closed with ${endpoint}`)
         status = 'Closed'
-        _reconnectTimeout = setTimeout(() => this.connect(endpoint), reconnectDelay + 500)
+        reconnectTimeout = setTimeout(() => this.connect(endpoint), reconnectDelay + 500)
       }
 
       socket.onopen = (e) => {
         console.log(`Connected to ${endpoint}`)
         status = 'Connected'
         events.emit('connect', e)
-        for (const message of pendingMessages) this.send(message.event, message.data)
+        for (let message of pendingMessages) this.send(message.event, message.data)
       }
       socket.onerror = (e) => {
         console.error(`Failed websocket connection to ${endpoint}`)
@@ -69,7 +69,7 @@ export class WebSocketClient {
       }
       socket.onmessage = ({ data }) => {
         try {
-          const messageObject: MessageObject = JSON.parse(data)
+          let messageObject: MessageObject = JSON.parse(data)
           try {
             if (messageObject.event) {
               events.emit(messageObject.event, messageObject.data)
@@ -88,7 +88,7 @@ export class WebSocketClient {
   }
 
   send(event: string, data?: any) {
-    const message = JSON.stringify({ event, data })
+    let message = JSON.stringify({ event, data })
     try {
       if (socket?.readyState === WebSocket.OPEN) socket.send(message)
       else pendingMessages.push({ event, data })

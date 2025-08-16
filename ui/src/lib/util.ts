@@ -1,17 +1,17 @@
-import { accessKey, broadcastId, nodes, packets, type NodeInfo } from 'api/src/vars'
+import { accessKey, apiHostname, broadcastId, lastFromRadio, nodes, packets, type NodeInfo } from 'api/src/vars'
 import { tick } from 'svelte'
 import { derived, get, writable } from 'svelte/store'
 import { enableAudioAlerts } from '../Settings.svelte'
 import axios from 'axios'
 
-export const blockUserKey = writable(false)
+export let blockUserKey = writable(false)
 export const userKey = writable(localStorage.getItem('userKey') || '')
 
-export const hasAccess = derived([accessKey, userKey], ([$accessKey, $userKey]) => window.location.hostname === 'localhost' || ($accessKey !== '' && $accessKey === $userKey))
+export const hasAccess = derived([accessKey, userKey], ([$accessKey, $userKey]) => window.location.hostname == 'localhost' || ($accessKey != '' && $accessKey == $userKey))
 
 let failedUserKeyAttempts = 0
 userKey.subscribe(async (value) => {
-  axios.defaults.headers.authorization = `Bearer ${value}`
+  axios.defaults.headers['authorization'] = `Bearer ` + value
   await tick()
 
   if (get(hasAccess)) {
@@ -56,7 +56,7 @@ export function isScrollAtEnd(element: HTMLElement) {
 
 export function scrollToBottom(element: HTMLElement, force?, notifyUnseen: (recordsUnseen: boolean) => void = undefined) {
   if (!element) return
-  const atEnd = isScrollAtEnd(element)
+  let atEnd = isScrollAtEnd(element)
   tick().then(() => {
     if (atEnd || force) {
       element.scrollTop = element.scrollHeight
@@ -68,36 +68,36 @@ export function scrollToBottom(element: HTMLElement, force?, notifyUnseen: (reco
 }
 
 export function getCoordinates(node: NodeInfo | number) {
-  if (typeof node === 'number') node = getNodeById(node)
+  if (typeof node == 'number') node = getNodeById(node)
   if (!node?.position?.longitudeI) return [node?.approximatePosition?.longitude, node?.approximatePosition?.latitude]
   return [node?.position?.longitudeI / 10000000, node?.position?.latitudeI / 10000000]
 }
 
 export function getNodeById(num: number) {
-  return nodes.value.find((n) => n.num === num) || ({ num } as NodeInfo)
+  return nodes.value.find((n) => n.num == num) || ({ num } as NodeInfo)
 }
 
-export const audioNewMessage = new Audio(`${import.meta.env.VITE_PATH || ''}/audioNewMessage.mp3`)
+export let audioNewMessage = new Audio(`${import.meta.env.VITE_PATH || ''}/audioNewMessage.mp3`)
 
 packets.on('upsert', (e) => {
   if (get(enableAudioAlerts) && e[0].message?.show) audioNewMessage.play()
 })
 
 export function getNodeNameById(id: number) {
-  if (id === broadcastId) return 'all'
-  if (id === undefined) return 'unknown'
-  const node = nodes.value.find((node) => node.num === id)
+  if (id == broadcastId) return 'all'
+  if (id == undefined) return 'unknown'
+  let node = nodes.value.find((node) => node.num == id)
   return node ? getNodeName(node) : `!${id?.toString(16)?.padStart(8, '0')}`
 }
 
 export function getNodeName(node: NodeInfo) {
-  return node?.user?.shortName || node?.user?.id || `!${node?.num?.toString(16)?.padStart(8, '0')}`
+  return node?.user?.shortName || node?.user?.id || '!' + node?.num?.toString(16)?.padStart(8, '0')
 }
 
 export function setPosition(latitude: number, longitude: number) {
-  const latitudeI = Math.round(latitude * 10000000)
-  const longitudeI = Math.round(longitude * 10000000)
-  const position = { latitudeI, longitudeI }
+  let latitudeI = Math.round(latitude * 10000000)
+  let longitudeI = Math.round(longitude * 10000000)
+  let position = { latitudeI, longitudeI }
   console.log('Updating position', position)
   axios.post('/position', position, { timeout: 3000 })
 }
@@ -189,10 +189,10 @@ export function testPacket() {
   })
 }
 
-export const displayFahrenheit = writable(localStorage.getItem('displayFahrenheit') === 'true')
+export let displayFahrenheit = writable(localStorage.getItem('displayFahrenheit') == 'true')
 displayFahrenheit.subscribe((value) => localStorage.setItem('displayFahrenheit', String(value)))
 
 export function formatTemp(tempC: number, displayFahrenheit?: boolean) {
-  if (displayFahrenheit) return `${Math.round((tempC * 9) / 5 + 32)}  °F`
-  return `${Math.round(tempC)}  °C`
+  if (displayFahrenheit) return Math.round((tempC * 9) / 5 + 32) + '  °F'
+  return Math.round(tempC) + '  °C'
 }

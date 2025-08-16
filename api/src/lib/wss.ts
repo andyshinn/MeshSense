@@ -1,6 +1,6 @@
 import WebSocket, { WebSocketServer } from 'ws'
-import type { IncomingMessage, Server } from 'node:http'
-import { parse } from 'node:url'
+import { IncomingMessage, Server } from 'http'
+import { parse } from 'url'
 import EventEmitter from 'eventemitter3'
 
 export interface MessageObject {
@@ -8,7 +8,7 @@ export interface MessageObject {
   data: any
 }
 
-export const events = new EventEmitter()
+export let events = new EventEmitter()
 
 /**
  * ```
@@ -39,7 +39,7 @@ export class WebSocketHTTPServer extends WebSocketServer {
     this.on('connection', (socket, request) => {
       let remoteAddress = 'x-forwarded-for' in request.headers ? String(request.headers['x-forwarded-for']).split(',')[0].trim() : request.socket.remoteAddress
 
-      remoteAddress = `${remoteAddress}:${request.socket['_peername']?.port}`
+      remoteAddress = remoteAddress + ':' + request.socket['_peername']?.port
 
       console.log('[WSS]', `Connection from ${remoteAddress}`)
       socket['remoteAddress'] = remoteAddress
@@ -64,7 +64,7 @@ export class WebSocketHTTPServer extends WebSocketServer {
       }
 
       const { pathname } = parse(request.url)
-      if (!path || pathname === path) {
+      if (!path || pathname == path) {
         this.handleUpgrade(request, socket, head, (socket) => {
           this.emit('connection', socket, request)
         })
@@ -74,7 +74,7 @@ export class WebSocketHTTPServer extends WebSocketServer {
 
   processIncomingMessage(message: any, socket: WebSocket) {
     try {
-      const messageObject: MessageObject = JSON.parse(message)
+      let messageObject: MessageObject = JSON.parse(message)
       console.log('[WSS]', socket['remoteAddress'], messageObject?.data)
       try {
         if (messageObject.event) this.msg.emit(messageObject.event, messageObject.data, socket)
@@ -92,13 +92,13 @@ export class WebSocketHTTPServer extends WebSocketServer {
    * - `skip` Socket to skip
    */
   send(event: string, data?: any, options: { to?: WebSocket; skip?: WebSocket } = {}) {
-    const message = JSON.stringify({ event, data })
+    let message = JSON.stringify({ event, data })
 
     try {
       if (options.to) options.to.send(message)
       else {
         this.clients.forEach(function each(client) {
-          if (client !== options.skip && client.readyState === WebSocket.OPEN) client.send(message)
+          if (client != options.skip && client.readyState === WebSocket.OPEN) client.send(message)
         })
       }
     } catch (e) {

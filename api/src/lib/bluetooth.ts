@@ -2,8 +2,8 @@ import { Bluetooth } from 'webbluetooth'
 import { TransportWebBluetooth } from '@meshtastic/transport-web-bluetooth'
 import { State } from './state'
 
-export const bluetoothDevices: Record<string, any> = {}
-const bluetoothDeviceList = new State('bluetoothDeviceList', [], { primaryKey: 'id', hideLog: true })
+export let bluetoothDevices: Record<string, any> = {}
+let bluetoothDeviceList = new State('bluetoothDeviceList', [], { primaryKey: 'id', hideLog: true })
 
 let scanning = false
 let exitScanning = false
@@ -17,16 +17,16 @@ export async function scanForDevice() {
   console.log('[bluetooth] scanning...')
 
   try {
-    const device: any = await bluetooth.requestDevice({
+    let device: any = await bluetooth.requestDevice({
       filters: [{ services: [TransportWebBluetooth.ServiceUuid] }]
     }).catch((e) => console.warn(e))
 
     if (device) {
       console.log('[bluetooth] Device Detected |', device.id, device.name)
       bluetoothDevices[device.id] = device
-      const { id, name } = device
+      let { id, name } = device
       bluetoothDeviceList.upsert({ id, name })
-      if (device.id === deviceTargetId) stopScanning()
+      if (device.id == deviceTargetId) stopScanning()
     }
 
     if (!exitScanning) setTimeout(scanForDevice, 500)
@@ -49,7 +49,7 @@ export async function beginScanning(targetId?: string) {
   /** Look for an available bluetooth adapter */
   try {
     adapterAvailable = await bluetooth.getAvailability()
-  } catch (_e) {
+  } catch (e) {
     console.warn('[bluetooth] Unable to detect Bluetooth adapters')
   }
 
