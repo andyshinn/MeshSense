@@ -1,12 +1,10 @@
 import typescript from '@rollup/plugin-typescript'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
-// import commonjs from '/data/proj/node/rollup-plugins/packages/commonjs/dist/es/index.js';
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
-import nativePlugin from 'rollup-plugin-natives'
-import terser from '@rollup/plugin-terser'
-import inject from '@rollup/plugin-inject'
+import copy from 'rollup-plugin-copy'
 import { defineConfig } from 'rollup'
+import { platform, arch } from 'os'
 
 let externals = [
   '@mikro-orm/sqlite',
@@ -30,60 +28,77 @@ let externals = [
   'aws-sdk',
   'nock',
   'mariadb/callback',
-  'libsql',
-  '@meshtastic/core',
-  '@meshtastic/transport-http',
-  '@meshtastic/transport-web-bluetooth',
-  '@meshtastic/transport-web-serial'
+  'libsql'
 ]
 
 export default defineConfig({
   input: 'src/index.ts',
   output: {
-    // dir: 'dist',
-    // sourcemap: true,
     file: 'dist/index.cjs',
     format: 'cjs',
-    // file: 'dist/index.mjs',
-    // format: 'es',
-    plugins: [
-      // terser({
-      //   keep_classnames: true,
-      //   mangle: false
-      // })
-    ]
+    inlineDynamicImports: true
   },
   external: externals,
   plugins: [
-    nativePlugin({
-      copyTo: 'dist',
-      map: (modulePath) => console.log(modulePath) || modulePath,
-      targetEsm: true // Important
+    // Handle JSR package npm: prefix imports only
+    {
+      name: 'jsr-npm-prefix-resolver',
+      resolveId(source, importer) {
+        // Handle npm: prefix imports from JSR packages
+        if (source.startsWith('npm:')) {
+          const match = source.match(/^npm:(.+?)(@[\d.]+)?$/)
+          if (match) {
+            const packageName = match[1]
+            return this.resolve(packageName, importer, { skipSelf: true })
+          }
+        }
+        return null
+      }
+    },
+    typescript({
+      target: 'esnext',
+      tsconfig: './tsconfig.json',
+      sourceMap: false,
+      // Exclude JSR packages from TypeScript processing since they're already transpiled
+      exclude: ['**/node_modules/@jsr/**']
     }),
     nodeResolve({
-      // node-resolve has to come before commonjs -- Rich-Harris
-      preferBuiltins: true
-      // resolveOnly: ['@mikro-orm/better-sqlite', '@mikro-orm/core', 'axios']
+      preferBuiltins: true,
+      extensions: ['.mjs', '.js', '.json', '.node']
     }),
     commonjs({
       ignore: externals,
-      ignoreDynamicRequires: true,   // Should be commented   // Uncommented for serialport
-      transformMixedEsModules: true, // Not sure about this
-      dynamicRequireTargets: [
-        // 'node_modules/@serialport/bindings-cpp/prebuilds/win32-x64/node.napi.node'
-        // 'node_modules/better-sqlite3/build/Release/better_sqlite3.node'
-      ],
-
-      // Possible fix?
+      ignoreDynamicRequires: true,
+      transformMixedEsModules: true,
       ignoreGlobal: true
     }),
-    typescript({
-      target: 'esnext',
-      compilerOptions: {
-        allowImportingTsExtensions: false
-      }
-      // sourceMap: true
-    }),
-    json()
+    json(),
+    // Copy files using rollup-plugin-copy
+    copy({
+      targets: [
+        // Copy serialport bindings to electron prebuilds
+        {
+          src: `node_modules/@serialport/bindings-cpp/prebuilds/${platform()}-x64+${arch()}/*.node`,
+          dest: `../electron/resources/prebuilds/${platform()}-x64+${arch()}`
+        },
+        // Copy built API to electron resources
+        {
+          src: 'dist/index.cjs',
+          dest: '../electron/resources/api'
+        },
+        // Copy static files to electron resources
+        {
+          src: 'dist/static/**/*',
+          dest: '../electron/resources/api/static'
+        },
+        // Copy simpleble.node to the expected prebuild structure (electron)
+        {
+          src: 'dist/simpleble.node',
+          dest: `../electron/resources/prebuilds/simpleble-${platform()}-${arch()}`,
+          rename: 'node-napi-v6.node'
+        }
+      ],
+      hook: 'writeBundle'
+    })
   ]
 })

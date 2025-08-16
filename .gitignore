@@ -10,3 +10,6 @@ api/prebuilds
 electron/resources/api
 electron/resources/prebuilds
 electron-builder.env
+node.napi.node
+node-napi-v6.node
+simpleble.node

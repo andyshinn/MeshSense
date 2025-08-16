@@ -1,5 +1,5 @@
 import { Bluetooth } from 'webbluetooth'
-import { TransportWebBluetooth } from '@meshtastic/transport-web-bluetooth'
+import { TransportWebBluetooth } from '@jsr/meshtastic__transport-web-bluetooth'
 import { State } from './state'
 
 export let bluetoothDevices: Record<string, any> = {}

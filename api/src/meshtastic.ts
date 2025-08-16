@@ -2,9 +2,9 @@
  * https://js.meshtastic.org/
  */
 
-import { MeshDevice, Protobuf, Types } from '@meshtastic/core'
-import { TransportHTTP } from '@meshtastic/transport-http'
-import { TransportWebBluetooth } from '@meshtastic/transport-web-bluetooth'
+import { MeshDevice, Protobuf, Types } from '@jsr/meshtastic__core'
+import { TransportHTTP } from '@jsr/meshtastic__transport-http'
+import { TransportWebBluetooth } from '@jsr/meshtastic__transport-web-bluetooth'
 import {
   Channel,
   MeshPacket,

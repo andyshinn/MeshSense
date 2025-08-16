@@ -29,9 +29,10 @@ const config = {
     '!electron.vite.config.{js,ts,mjs,cjs}',
     '!{.eslintignore,.eslintrc.js,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}',
     '!{.env,.env.*,.npmrc,pnpm-lock.yaml}',
-    '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+    '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}',
+    'resources/**'
   ],
-  asarUnpack: ['resources/**'],
+  asar: false,
   win: {
     artifactName: '${name}' + channelString + '-${arch}.${ext}',
     executableName: 'MeshSense',
