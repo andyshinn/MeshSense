@@ -11,10 +11,10 @@
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
-    "build": "npm run build --workspaces",
-    "build:mac": "npm run build --workspaces && npm run build:mac -w electron",
-    "build:win": "npm run build --workspaces && npm run build:win -w electron",
-    "build:linux": "npm run build --workspaces && npm run build:linux -w electron"
+    "build": "pnpm -r build",
+    "build:mac": "pnpm -r build && pnpm --filter electron build:mac",
+    "build:win": "pnpm -r build && pnpm --filter electron build:win",
+    "build:linux": "pnpm -r build && pnpm --filter electron build:linux"
   },
   "repository": {
     "type": "git",
