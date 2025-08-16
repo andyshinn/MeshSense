@@ -46,42 +46,22 @@ git clone --recurse-submodules https://github.com/Affirmatech/MeshSense.git
 cd MeshSense
 ```
 
-Build `webbluetooth` Dependency.  Debian systems will need the `cmake` and `libdbus-1-dev` packages.
-
-```
-cd api/webbluetooth
-npm i
-npm run build:all
-cd ../..
-```
-
-The `update.mjs` script will pull the latest code and install dependencies for the `ui`, `api`, and `electron` directories.
+The `pnpm` tool will install the dependencies for `ui`, `api`, and `electron` directories.
 
 ```sh
-./update.mjs
+pnpm install
 ```
 
-During development, the electron portion is usually not needed. First start the UI Vite service as follows:
+During development, the electron portion is usually not needed. ou can start the UI and API services using:
 
 ```sh
-cd ui
-PORT=5921 npm run dev
+pnpm run dev
 ```
 
-Leave the UI running and then also start the API service. The `DEV_UI_URL` will tell the API to forward any unhandled route requests to the UI service and should use the same port as above.
-
-```sh
-cd api
-export DEV_UI_URL=http://localhost:5921
-PORT=5920 npm run dev
-```
-
-The `PORT` variables in the above are optional and will default to the values in the example, but ensure `DEV_UI_URL` is present with the correct port if changed. These values may also be read from `.env` files `api/.env` and `ui/.env` respectively.
-
-The front-end should now be accessible by connecting to the **API** service in a browser. Be careful not to connect to the UI service by accident. http://localhost:5920/
+The front-end should now be accessible by connecting to the **API** service in a browser. Be careful not to connect to the UI service by accident. The correct URL (API URL) is http://localhost:5920/
 
 Any API changes will automatically reload the service. Any UI changes will be hot-reloaded by Vite.
 
 **Please note:** currently certain event subscribers (particularly State variables) will duplicate their subscription when Vite hot-reloads resulting in duplicate events such as Log entries. Until this is fixed, the easiest solution is to refresh the browser to reset the events.
 
-To build the `ui`, `api`, and `electron` components, the `build.mjs` script will accomplish this. The official electron builds are signed with an Affirmatech certificate on our build servers. The deployables will be placed in `api/dist` and `electron/dist`.
+To build the `ui`, `api`, and `electron` components, the `pnpm run build` script will accomplish this. The official electron builds are signed with an Affirmatech certificate on our build servers. The deployables will be placed in `api/dist` and `electron/dist`.

@@ -1,7 +1,7 @@
-import url from 'url'
-import { dirname, sep, join } from 'path'
+import url from 'node:url'
+import { dirname, sep, join } from 'node:path'
 import envPaths from 'env-paths'
-import { existsSync, fstat, mkdirSync } from 'fs'
+import { existsSync, mkdirSync } from 'node:fs'
 
 const userPaths = envPaths('meshsense', { suffix: '' })
 const __filename = url.fileURLToPath(import.meta.url)

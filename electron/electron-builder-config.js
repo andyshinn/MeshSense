@@ -1,6 +1,6 @@
 var pjson = require('./package.json')
-let channel = pjson.version.match(/-(?<channel>\w*).*/)?.groups?.channel
-let channelString = channel ? `-${channel}` : ''
+const channel = pjson.version.match(/-(?<channel>\w*).*/)?.groups?.channel
+const channelString = channel ? `-${channel}` : ''
 
 const winSigningOptions = {
   signingHashAlgorithms: ['sha256'],
@@ -23,31 +23,26 @@ const config = {
   directories: {
     buildResources: 'build'
   },
-  files: [
-    '!**/.vscode/*',
-    '!src/*',
-    '!electron.vite.config.{js,ts,mjs,cjs}',
-    '!{.eslintignore,.eslintrc.js,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}',
-    '!{.env,.env.*,.npmrc,pnpm-lock.yaml}',
-    '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}',
-    'resources/**'
+  asar: true,
+  asarUnpack: [
+    'resources/**',
+    'prebuilds/**',
   ],
-  asar: false,
   win: {
-    artifactName: '${name}' + channelString + '-${arch}.${ext}',
+    artifactName: `\${name}${channelString}-\${arch}.\${ext}`,
     executableName: 'MeshSense',
     signAndEditExecutable: true,
     verifyUpdateCodeSignature: true,
     signtoolOptions: enableWinSigning ? winSigningOptions : undefined,
   },
   nsis: {
-    artifactName: '${name}' + channelString + '-${arch}.${ext}',
+    artifactName: `\${name}${channelString}-\${arch}.\${ext}`,
     shortcutName: '${productName}',
     uninstallDisplayName: '${productName}',
     createDesktopShortcut: true
   },
   mac: {
-    artifactName: '${name}' + channelString + '-${arch}.${ext}',
+    artifactName: `\${name}${channelString}-\${arch}.\${ext}`,
     icon: 'build/meshsense-regular-adaptive.icns',
     entitlementsInherit: 'build/entitlements.mac.plist',
     extendInfo: [
@@ -60,10 +55,11 @@ const config = {
         target: 'dmg',
         arch: ['universal'],
       }
-    ]
+    ],
+    singleArchFiles: "Contents/Resources/app/node_modules/**/*.node",
   },
   dmg: {
-    artifactName: '${name}' + channelString + '-${arch}.${ext}'
+    artifactName: `\${name}${channelString}-\${arch}.\${ext}`
   },
   linux: {
     target: ['AppImage'],
@@ -71,9 +67,8 @@ const config = {
     category: 'Utility'
   },
   appImage: {
-    artifactName: '${name}' + channelString + '-${arch}.${ext}'
+    artifactName: `\${name}${channelString}-\${arch}.\${ext}`
   },
-  npmRebuild: false,
   publish: {
     provider: 'generic',
     url: 'https://affirmatech.com/download/meshsense'

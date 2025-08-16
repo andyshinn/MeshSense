@@ -1,5 +1,5 @@
-import { BrowserWindow, app } from 'electron'
-import { join } from 'path'
+import { type BrowserWindow, app } from 'electron'
+import { join } from 'node:path'
 import { keyFileStorage } from 'key-file-storage'
 
 const userDataPath = app.getPath('userData')

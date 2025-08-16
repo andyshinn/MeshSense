@@ -1,6 +1,6 @@
 {
   "name": "electron",
-  "version": "0.0.0",
+  "version": "1.2.0",
   "description": "MeshSense is a simple, open-source application that monitors, maps and graphically displays all the vital stats of your area's Meshtastic network including connected nodes, signal reports, trace routes and more!",
   "main": "./out/main/index.js",
   "author": "Affirmatech Inc.",
@@ -8,20 +8,18 @@
   "scripts": {
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
-    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
-    "build": "npm run typecheck && electron-vite build",
+    "build": "pnpm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
-    "build:unpack": "npm run build && electron-builder --dir",
-    "build:win": "npm run build && electron-builder --win --config electron-builder-config.js",
-    "build:mac": "npm run build && electron-builder --mac --config electron-builder-config.js",
-    "build:linux": "npm run build && electron-builder --linux --config electron-builder-config.js",
+    "build:unpack": "pnpm run build && electron-builder --dir",
+    "build:win": "pnpm run build && electron-builder --win --config electron-builder-config.js",
+    "build:mac": "pnpm run build && electron-builder --mac --config electron-builder-config.js",
+    "build:linux": "pnpm run build && electron-builder --linux --config electron-builder-config.js",
     "icon:generate": "cd build && ./create-adaptive-icon.sh"
   },
   "dependencies": {
-    "@electron-toolkit/preload": "^3.0.2",
-    "@electron-toolkit/utils": "^4.0.0",
     "@meshtastic/core": "jsr:^2.6.6",
     "@meshtastic/protobufs": "jsr:^2.7.0",
     "@meshtastic/transport-http": "jsr:^0.2.1",
@@ -32,6 +30,8 @@
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@electron-toolkit/preload": "^3.0.2",
+    "@electron-toolkit/utils": "^4.0.0",
     "@rollup-extras/plugin-copy": "^1.11.1",
     "@types/node": "^24.3.0",
     "electron": "^37.3.0",

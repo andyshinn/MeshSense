@@ -1,5 +1,5 @@
 import { app, shell, BrowserWindow, ipcMain, utilityProcess } from 'electron'
-import { join } from 'path'
+import { join } from 'node:path'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { autoUpdater } from 'electron-updater'
@@ -86,7 +86,7 @@ function createWindow(): void {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
   console.log(`DIRNAME`, __dirname)
-  let apiPath = join(__dirname, '../../resources/api/index.cjs').replace('app.asar', 'app.asar.unpacked')
+  const apiPath = join(__dirname, '../../resources/api/index.cjs').replace('app.asar', 'app.asar.unpacked')
   console.log(`API_PATH`, apiPath)
 
   apiProcess = utilityProcess.fork(apiPath, process.argv, { stdio: 'pipe' })
@@ -99,7 +99,7 @@ app.whenReady().then(async () => {
 
   function createWindowOnServerListening(e: any) {
     if (String(e).startsWith('Server listening')) {
-      apiPort = String(e).match(/port: (?<port>\d*)/)?.groups?.['port']
+      apiPort = String(e).match(/port: (?<port>\d*)/)?.groups?.port
       console.log('CREATING WINDOW')
       apiProcess.stdout?.removeListener('data', createWindowOnServerListening)
       createWindow()
@@ -107,7 +107,7 @@ app.whenReady().then(async () => {
   }
 
   console.log('[electron] Arguments', process.argv)
-  let headless = process.argv.includes('--headless')
+  const headless = process.argv.includes('--headless')
   if (!headless) {
     apiProcess.stdout?.on('data', createWindowOnServerListening)
   }
@@ -117,11 +117,11 @@ app.whenReady().then(async () => {
 
   apiProcess.on('message', (e) => {
     console.log('[api to electron]', e)
-    if (e.event == 'installUpdate') {
+    if (e.event === 'installUpdate') {
       autoUpdater.autoRunAppAfterInstall = !headless
       autoUpdater.quitAndInstall()
-    } else if (e.event == 'checkUpdate') autoUpdater.checkForUpdates()
-    else if (e.event == 'setUpdateChannel') {
+    } else if (e.event === 'checkUpdate') autoUpdater.checkForUpdates()
+    else if (e.event === 'setUpdateChannel') {
       console.log('[electron] Set update channel', e.body)
       autoUpdater.channel = e.body
     }
@@ -162,7 +162,7 @@ app.whenReady().then(async () => {
 
   // createWindow()
 
-  app.on('activate', function () {
+  app.on('activate', () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

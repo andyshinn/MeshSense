@@ -1,15 +1,14 @@
 #!/usr/bin/env node
-import { spawn } from 'child_process'
-import { styleText } from 'util';
+import { spawn } from 'node:child_process'
 import './api/node_modules/dotenv/config.js'
 import config from './electron/package.json' with { type: "json" }
 
-let runCmd = (commandString) => new Promise((resolve, reject) => {
-  let cmd = spawn(commandString, { shell: true, env: process.env })
+const runCmd = (commandString) => new Promise((resolve, reject) => {
+  const cmd = spawn(commandString, { shell: true, env: process.env })
   cmd.stdout.on('data', (data) => process.stdout.write(data))
   cmd.stderr.on('data', (data) => process.stderr.write(data))
   cmd.on('error', (e) => reject(e))
-  cmd.on('close', (e) => e == 0 ? resolve() : reject(`Return code: ${e}`))
+  cmd.on('close', (e) => e === 0 ? resolve() : reject(`Return code: ${e}`))
 })
 
 if (!process.env.DEPLOY_LOCATION) {

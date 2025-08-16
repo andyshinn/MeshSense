@@ -47,7 +47,7 @@ export class State<T = any> {
     }
     State.states[name] = this
     this.name = name
-    this.value = State.defaults[name] == undefined ? value : State.defaults[name]
+    this.value = State.defaults[name] === undefined ? value : State.defaults[name]
     // console.log('[State]', name, State.defaults[name] == undefined ? 'init' : 'loaded', this.value)
     this.flags = flags
   }
@@ -65,8 +65,8 @@ export class State<T = any> {
   }
 
   static subscribe<T = any>(callback: ActionCallback<T>) {
-    this.allEvents.on('notify', callback)
-    return () => this.allEvents.removeListener('notify', callback)
+    State.allEvents.on('notify', callback)
+    return () => State.allEvents.removeListener('notify', callback)
   }
 
   on(action: string, callback: (...args: any[]) => void) {
@@ -80,7 +80,7 @@ export class State<T = any> {
   }
 
   set(value: T) {
-    if (this.value == value) return
+    if (this.value === value) return
     this.value = value
     this.notify('set', value)
   }
@@ -113,7 +113,7 @@ export class State<T = any> {
 
   /** Search array and run `Object.assign` on first match.  If no match, value will be appended */
   upsert(value: object, primaryKey: string = (this.flags.primaryKey as string) || 'id') {
-    let match = (this.value as any[]).find((record: any) => record[primaryKey] == value[primaryKey] && record[primaryKey] != undefined)
+    const match = (this.value as any[]).find((record: any) => record[primaryKey] === value[primaryKey] && record[primaryKey] !== undefined)
     if (match) Object.assign(match, value)
     else (this.value as any[]).push(value)
     this.notify('upsert', value, primaryKey)
@@ -127,19 +127,19 @@ export class State<T = any> {
   delete(value: any | [], primaryKey: string = this.flags.primaryKey || 'id') {
     // If the value being deleted is not an object, do a straight comparison
     if (typeof value !== 'object') {
-      this.value = (this.value as []).filter((record: any) => record != value) as T
+      this.value = (this.value as []).filter((record: any) => record !== value) as T
     }
 
     // Value is an object, delete by matching `primaryKey`
     else if (Array.isArray(value)) this.value = (this.value as []).filter((record: any) => !value.includes(record[primaryKey])) as T
-    else this.value = (this.value as []).filter((record: any) => record[primaryKey] != value[primaryKey]) as T
+    else this.value = (this.value as []).filter((record: any) => record[primaryKey] !== value[primaryKey]) as T
 
     this.notify('delete', value, primaryKey)
   }
 
   /** Removes the first element from an array and returns it. If the array is empty, undefined is returned and the array is not modified. */
   shift() {
-    let value = (this.value as []).shift()
+    const value = (this.value as []).shift()
     this.notify('shift')
     return value
   }

@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
-import basicSsl from '@vitejs/plugin-basic-ssl'
 import 'dotenv/config'
 
 // https://vitejs.dev/config/
