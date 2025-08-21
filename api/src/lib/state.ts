@@ -21,7 +21,7 @@ interface StateFlags {
 
   State.defaults = { counter: 20 }
 
-  let counter = new State<number>('counter')
+  let counter = State.create<number>('counter')
   console.log(counter.value)
   ```
  */
@@ -41,15 +41,19 @@ export class State<T = any> {
   flags: StateFlags = {}
 
   constructor(name: string, value?: T, flags: StateFlags = {}) {
-    if (Object.hasOwn(State.states, name)) {
-      // console.info(`State '${name}' is already defined`)
-      return State.states[name]
-    }
     State.states[name] = this
     this.name = name
     this.value = State.defaults[name] == undefined ? value : State.defaults[name]
     // console.log('[State]', name, State.defaults[name] == undefined ? 'init' : 'loaded', this.value)
     this.flags = flags
+  }
+
+  static create<T = any>(name: string, value?: T, flags: StateFlags = {}): State<T> {
+    if (Object.hasOwn(State.states, name)) {
+      // console.info(`State '${name}' is already defined`)
+      return State.states[name] as State<T>
+    }
+    return new State<T>(name, value, flags)
   }
 
   notify(action?: string, ...args: any[]) {

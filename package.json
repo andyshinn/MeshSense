@@ -12,9 +12,9 @@
     "lint": "biome lint",
     "check": "biome check",
     "build": "npm run build --workspaces",
-    "build:mac": "npm -w ui -w api run build && npm -w electron run build:mac -- -a universal",
-    "build:win": "npm -w ui -w api run build && npm -w electron run build:win",
-    "build:linux": "npm -w ui -w api run build && npm -w electron run build:linux"
+    "build:mac": "npm -w ui run build && npm -w api run build && npm -w electron run build:mac -- -a universal",
+    "build:win": "npm -w ui run build && npm -w api run build && npm -w electron run build:win",
+    "build:linux": "npm -w ui run build && npm -w api run build && npm -w electron run build:linux"
   },
   "repository": {
     "type": "git",

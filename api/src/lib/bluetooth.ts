@@ -2,8 +2,8 @@ import { TransportWebBluetooth } from "@meshtastic/transport-web-bluetooth"
 import { Bluetooth } from "webbluetooth"
 import { State } from "./state"
 
-export const bluetoothDevices: Record<string, any> = {}
-const bluetoothDeviceList = new State("bluetoothDeviceList", [], { primaryKey: "id", hideLog: true })
+export const bluetoothDevices: Record<string, BluetoothDevice> = {}
+const bluetoothDeviceList = State.create("bluetoothDeviceList", [], { primaryKey: "id", hideLog: true })
 
 let scanning = false
 let exitScanning = false
@@ -17,7 +17,7 @@ export async function scanForDevice() {
   console.log("[bluetooth] scanning...")
 
   try {
-    const device: any = await bluetooth
+    const device: BluetoothDevice | undefined = await bluetooth
       .requestDevice({
         filters: [{ services: [TransportWebBluetooth.ServiceUuid] }],
       })

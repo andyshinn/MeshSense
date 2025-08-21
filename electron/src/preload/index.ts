@@ -3,7 +3,7 @@ import { contextBridge, ipcRenderer } from "electron"
 // Minimal electron API for renderer
 const electronAPI = {
   ipcRenderer: {
-    send: (channel: string, ...args: any[]) => ipcRenderer.send(channel, ...args),
+    send: (channel: string, ...args: unknown[]) => ipcRenderer.send(channel, ...args),
   },
   process: {
     versions: process.versions,

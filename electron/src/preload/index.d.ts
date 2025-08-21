@@ -2,7 +2,7 @@ declare global {
   interface Window {
     electron: {
       ipcRenderer: {
-        send: (channel: string, ...args: any[]) => void
+        send: (channel: string, ...args: unknown[]) => void
       }
       process: {
         versions: NodeJS.ProcessVersions

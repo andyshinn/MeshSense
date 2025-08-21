@@ -5,7 +5,7 @@ import WebSocket, { WebSocketServer } from "ws"
 
 export interface MessageObject {
   event?: string
-  data: any
+  data: unknown
 }
 
 export const events = new EventEmitter()
@@ -75,7 +75,7 @@ export class WebSocketHTTPServer extends WebSocketServer {
     })
   }
 
-  processIncomingMessage(message: any, socket: WebSocket) {
+  processIncomingMessage(message: WebSocket.RawData, socket: WebSocket) {
     try {
       const messageObject: MessageObject = JSON.parse(message)
       console.log("[WSS]", socket["remoteAddress"], messageObject?.data)
@@ -94,7 +94,7 @@ export class WebSocketHTTPServer extends WebSocketServer {
    * - `to` Socket to send data to, otherwise send to all
    * - `skip` Socket to skip
    */
-  send(event: string, data?: any, options: { to?: WebSocket; skip?: WebSocket } = {}) {
+  send(event: string, data?: unknown, options: { to?: WebSocket; skip?: WebSocket } = {}) {
     const message = JSON.stringify({ event, data })
 
     try {

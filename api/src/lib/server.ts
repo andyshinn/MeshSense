@@ -48,10 +48,10 @@ process.on("unhandledRejection", (reason, promise) => {
   console.error(String(reason))
 })
 
-export const version = new State("version", "")
-export const headless = new State("headless", "")
-export const updateChannel = new State("updateChannel", undefined, { persist: true })
-export const updateStatus = new State("updateStatus", {})
+export const version = State.create("version", "")
+export const headless = State.create("headless", "")
+export const updateChannel = State.create("updateChannel", undefined, { persist: true })
+export const updateStatus = State.create("updateStatus", {})
 
 export const app: Express = express()
 app.use(express.json({ limit: "500mb" }))

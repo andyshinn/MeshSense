@@ -113,7 +113,7 @@ function checkForCachedRoute(node: NodeInfo) {
 myNodeNum.subscribe((value) => {
   console.log("Creating route cache for", value)
   if (Number(value) >= 0) {
-    routeCache = new State(`routeCache-${value}`, {}, { persist: true, hideLog: true })
+    routeCache = State.create(`routeCache-${value}`, {}, { persist: true, hideLog: true })
   } else routeCache = undefined
 })
 
@@ -589,7 +589,11 @@ async function processTraceRoutes() {
   connection.traceRoute(destination)
   pendingTraceroutes.shift()
   setTimeout(() => {
-    pendingTraceroutes.value.length ? processTraceRoutes() : (queueProcessing = false)
+    if (pendingTraceroutes.value.length) {
+      processTraceRoutes()
+    } else {
+      queueProcessing = false
+    }
   }, globalTracerouteRateLimitSec * 1000)
 }
 
@@ -627,7 +631,7 @@ export function getApproximatePosition(num: number) {
   // Check each trace route where this node is in the path
   for (const node of connectedNodes) {
     // For a given trace route, whereabouts is this node located?
-    const coord = estimatePositionFromTrace(num, [sourceNode, ...node.trace?.route?.map(getNodeById), node])
+    const coord = estimatePositionFromTrace(num, [sourceNode, ...(node.trace?.route?.map(getNodeById) || []), node])
     if (coord) possibleCoordinates.push(coord)
   }
 

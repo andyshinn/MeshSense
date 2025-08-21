@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Feature, Map, View } from "ol"
+import { Feature, Map as OLMap, View } from "ol"
 import { defaults as defaultControls } from "ol/control"
 import Control from "ol/control/Control"
 import { LineString, Point, Polygon } from "ol/geom"
@@ -26,7 +26,7 @@ let dispatch = createEventDispatcher()
 // export let maxDevicePoints = 10
 
 let mapElement: HTMLDivElement = $state()
-let map: Map
+let map: OLMap
 let layers: Record<string, Layer> = {}
 
 const prefersDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -244,7 +244,7 @@ class ToggleDarkModeControl extends Control {
 }
 
 onMount(() => {
-  map = new Map({
+  map = new OLMap({
     controls: defaultControls().extend([new ToggleDarkModeControl()]),
     target: mapElement,
   })

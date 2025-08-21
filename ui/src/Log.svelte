@@ -92,10 +92,16 @@ function showPin(packet: MeshPacket) {
   ol.showPin(description, long, lat, icon)
 }
 run(() => {
-  if ($packets) scrollToBottom(packetsDiv, false, (unseen) => (unseenMessages = unseen))
+  if ($packets)
+    scrollToBottom(packetsDiv, false, (unseen) => {
+      unseenMessages = unseen
+    })
 })
 run(() => {
-  messagesOnly, scrollToBottom(packetsDiv, true, (unseen) => (unseenMessages = unseen))
+  messagesOnly,
+    scrollToBottom(packetsDiv, true, (unseen) => {
+      unseenMessages = unseen
+    })
 })
 run(() => {
   if (showCsvModal) {

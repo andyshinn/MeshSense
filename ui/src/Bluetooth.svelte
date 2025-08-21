@@ -7,7 +7,7 @@ import { hasAccess } from "./lib/util"
 import { smallMode } from "./Nodes.svelte"
 
 interface Props {
-  [key: string]: any
+  [key: string]: unknown
 }
 
 let { ...rest }: Props = $props()

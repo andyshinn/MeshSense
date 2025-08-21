@@ -6,12 +6,15 @@ export function requestPermission() {
     alert("Notification API not supported!")
     return
   }
-  Notification.requestPermission((result) => (permissionStatus = result))
+  Notification.requestPermission().then((result) => {
+    permissionStatus = result
+  })
 }
 
 export function sendNotification() {
+  let notification: Notification
   try {
-    var notification = new Notification("Hi there - non-persistent!")
+    notification = new Notification("Hi there - non-persistent!")
   } catch (err) {
     alert("Notification API error: " + err)
   }

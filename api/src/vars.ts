@@ -1,36 +1,37 @@
+import type { Protobuf } from "@meshtastic/core"
 import { State } from "./lib/state"
 
-export const version = new State("version", "")
-export const headless = new State("headless", "")
-export const address = new State("address", "", { persist: "api" })
-export const connectionStatus = new State<
+export const version = State.create("version", "")
+export const headless = State.create("headless", "")
+export const address = State.create("address", "", { persist: "api" })
+export const connectionStatus = State.create<
   "connected" | "connecting" | "disconnected" | "searching" | "configuring" | "reconnecting"
 >("connectionStatus", "disconnected")
-export const lastFromRadio = new State("lastFromRadio", undefined, { hideLog: true })
-export const channels = new State<Channel[]>("channels", [], { primaryKey: "index", hideLog: true })
-export const packets = new State<MeshPacket[]>("packets", [], { hideLog: true })
-export const nodes = new State<NodeInfo[]>("nodes", [], { primaryKey: "num", hideLog: true })
-export const currentTime = new State<number>("currentTime", Date.now(), { hideLog: true })
-export const myNodeNum = new State<number>("myNodeNum")
+export const lastFromRadio = State.create("lastFromRadio", undefined, { hideLog: true })
+export const channels = State.create<Channel[]>("channels", [], { primaryKey: "index", hideLog: true })
+export const packets = State.create<MeshPacket[]>("packets", [], { hideLog: true })
+export const nodes = State.create<NodeInfo[]>("nodes", [], { primaryKey: "num", hideLog: true })
+export const currentTime = State.create<number>("currentTime", Date.now(), { hideLog: true })
+export const myNodeNum = State.create<number>("myNodeNum")
 export const broadcastId = 4294967295
-export const myNodeMetadata = new State<DeviceMetadata>("myNodeMetadata")
-export const accessKey = new State<string>("accessKey", undefined, { persist: true, hideLog: true })
-export const packetLimit = new State<number>("packetLimit", 500, { persist: true })
-export const apiHostname = new State<string>("apiHostname", undefined, { hideLog: true })
-export const apiPort = new State<string>("apiPort", undefined, { hideLog: true })
-export const messagePrefix = new State<string>("messagePrefix", undefined, { persist: true })
-export const messageSuffix = new State<string>("messageSuffix", undefined, { persist: true })
-export const allowRemoteMessaging = new State<boolean>("allowRemoteMessaging", false, { persist: true })
-export const autoConnectOnStartup = new State<boolean>("autoConnectOnStartup", true, { persist: true })
-export const enableTLS = new State<boolean>("enableTLS", false, { persist: true })
-export const automaticTraceroutes = new State<boolean>("automaticTraceroutes", true, { persist: true })
-export const meshSenseNewsDate = new State<number>("meshSenseNewsDate", 0, { persist: true })
-export const pendingTraceroutes = new State<number[]>("pendingTraceroutes", [], { hideLog: true })
-export const meshMapForwarding = new State<boolean>("meshMapForwarding", false, { hideLog: true, persist: true })
+export const myNodeMetadata = State.create<DeviceMetadata>("myNodeMetadata")
+export const accessKey = State.create<string>("accessKey", undefined, { persist: true, hideLog: true })
+export const packetLimit = State.create<number>("packetLimit", 500, { persist: true })
+export const apiHostname = State.create<string>("apiHostname", undefined, { hideLog: true })
+export const apiPort = State.create<string>("apiPort", undefined, { hideLog: true })
+export const messagePrefix = State.create<string>("messagePrefix", undefined, { persist: true })
+export const messageSuffix = State.create<string>("messageSuffix", undefined, { persist: true })
+export const allowRemoteMessaging = State.create<boolean>("allowRemoteMessaging", false, { persist: true })
+export const autoConnectOnStartup = State.create<boolean>("autoConnectOnStartup", true, { persist: true })
+export const enableTLS = State.create<boolean>("enableTLS", false, { persist: true })
+export const automaticTraceroutes = State.create<boolean>("automaticTraceroutes", true, { persist: true })
+export const meshSenseNewsDate = State.create<number>("meshSenseNewsDate", 0, { persist: true })
+export const pendingTraceroutes = State.create<number[]>("pendingTraceroutes", [], { hideLog: true })
+export const meshMapForwarding = State.create<boolean>("meshMapForwarding", false, { hideLog: true, persist: true })
 
 /** Measured in minutes */
-export const tracerouteRateLimit = new State<number>("tracerouteRateLimit", 60, { persist: true })
-export const nodeInactiveTimer = new State<number>("nodeInactiveTimer", 60, { persist: true })
+export const tracerouteRateLimit = State.create<number>("tracerouteRateLimit", 60, { persist: true })
+export const nodeInactiveTimer = State.create<number>("nodeInactiveTimer", 60, { persist: true })
 
 export type DeviceMetadata = {
   firmwareVersion: string
@@ -123,7 +124,7 @@ export type NodeInfo = {
   deviceMetrics?: DeviceMetrics
   environmentMetrics?: EnvironmentMetrics
   rssi?: number
-  trace?: any
+  trace?: Protobuf.Mesh.RouteDiscovery
   approximatePosition?: { longitude: number; latitude: number } | false
 }
 
@@ -148,8 +149,8 @@ export type MeshPacket = {
   to: number
   channel: number
   encrypted?: string
-  decoded?: any
-  payloadVariant?: any
+  decoded?: Protobuf.Data
+  payloadVariant?: { case: string; value: unknown }
   // {
   // case: 'decoded',
   // value: Data {
@@ -167,14 +168,14 @@ export type MeshPacket = {
   rxSnr: number
   hopLimit: number
   wantAck: boolean
-  priority: any
+  priority: Protobuf.Mesh.MeshPacket_Priority
   rxRssi: number
-  delayed: any
+  delayed: Protobuf.Mesh.MeshPacket_Delayed
   viaMqtt: boolean
   hopStart: number
   publicKey?: string
   pkiEncrypted?: boolean
-  data?: any
+  data?: Protobuf.Data
   message?: Message
   deviceMetrics?: DeviceMetrics
   environmentMetrics?: EnvironmentMetrics

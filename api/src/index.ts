@@ -54,7 +54,7 @@ intercept(
   },
 )
 
-function isAuthorized(req: any) {
+function isAuthorized(req: { headers: Record<string, string | undefined>; socket: { remoteAddress: string } }) {
   const token = req.headers["authorization"]?.split(" ")[1]
   console.log("Remote Address", req.socket.remoteAddress)
   return (
@@ -137,7 +137,7 @@ createRoutes((app) => {
 
   //** Capture current hostname and port */
   apiHostname.set(hostname())
-  apiPort.set((server.address() as any)?.port)
+  apiPort.set((server.address() as { port?: number } | null)?.port)
 
   // ** Check News Update */
   function checkForNews() {

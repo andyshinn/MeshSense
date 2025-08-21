@@ -9,7 +9,7 @@ import UpdateStatus from "./lib/UpdateStatus.svelte"
 import { hasAccess } from "./lib/util"
 // import ServiceWorker from './lib/ServiceWorker.svelte'
 import { WebSocketClient } from "./lib/wsc"
-import Map, { expandedMap } from "./Map.svelte"
+import MapComponent, { expandedMap } from "./Map.svelte"
 import Message from "./Message.svelte"
 import News, { newsVisible } from "./News.svelte"
 import Nodes, { focusNodeFilter, smallMode } from "./Nodes.svelte"
@@ -59,7 +59,7 @@ axios.defaults.baseURL = import.meta.env.VITE_PATH
   </div>
   <div id="content" class="grid grid-rows-[5fr_3fr] content-start h-full overflow-auto gap-2 relative">
     {#if $connectionStatus == 'connected'}
-      <Map class={$expandedMap ? 'row-span-full col-span-full' : ''} bind:ol />
+      <MapComponent class={$expandedMap ? 'row-span-full col-span-full' : ''} bind:ol />
     {:else}
       <div class="grid items-center px-5 m-auto">
         <div class="text-3xl font-bold text-white">Welcome to MeshSense!</div>
