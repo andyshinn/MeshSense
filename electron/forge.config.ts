@@ -27,6 +27,7 @@ const enableWinSigning = process.env.ENABLE_WIN_SIGNING === 'true';
 const config: ForgeConfig = {
   packagerConfig: {
     name: 'MeshSense',
+    executableName: 'meshsense',
     asar: true,
     appBundleId: 'com.affirmatech.meshsense',
     icon: process.platform === 'darwin' ? 'build/meshsense-regular-adaptive' : 'build/icon',
@@ -44,7 +45,6 @@ const config: ForgeConfig = {
       setupExe: `MeshSense${channelString}-{{arch}}-Setup.{{ext}}`,
       iconUrl: 'https://affirmatech.com/favicon.ico',
       setupIcon: 'build/icon.ico',
-      loadingGif: 'build/install-spinner.gif',
       noMsi: true,
       ...(enableWinSigning ? winSigningOptions : {}),
     }, ['win32']),
