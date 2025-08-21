@@ -1,7 +1,7 @@
-import WebSocket, { WebSocketServer } from 'ws'
-import { IncomingMessage, Server } from 'http'
-import { parse } from 'url'
-import EventEmitter from 'eventemitter3'
+import WebSocket, { WebSocketServer } from "ws"
+import { IncomingMessage, Server } from "http"
+import { parse } from "url"
+import EventEmitter from "eventemitter3"
 
 export interface MessageObject {
   event?: string
@@ -36,15 +36,18 @@ export class WebSocketHTTPServer extends WebSocketServer {
   constructor(server: Server, options?: WebSocket.ServerOptions<typeof WebSocket, typeof IncomingMessage>) {
     super({ noServer: true, ...options })
     this.attachHTTPServer(server, options?.path)
-    this.on('connection', (socket, request) => {
-      let remoteAddress = 'x-forwarded-for' in request.headers ? String(request.headers['x-forwarded-for']).split(',')[0].trim() : request.socket.remoteAddress
+    this.on("connection", (socket, request) => {
+      let remoteAddress =
+        "x-forwarded-for" in request.headers
+          ? String(request.headers["x-forwarded-for"]).split(",")[0].trim()
+          : request.socket.remoteAddress
 
-      remoteAddress = remoteAddress + ':' + request.socket['_peername']?.port
+      remoteAddress = remoteAddress + ":" + request.socket["_peername"]?.port
 
-      console.log('[WSS]', `Connection from ${remoteAddress}`)
-      socket['remoteAddress'] = remoteAddress
+      console.log("[WSS]", `Connection from ${remoteAddress}`)
+      socket["remoteAddress"] = remoteAddress
 
-      socket.on('message', (message) => {
+      socket.on("message", (message) => {
         this.processIncomingMessage(message, socket)
       })
     })
@@ -56,9 +59,9 @@ export class WebSocketHTTPServer extends WebSocketServer {
   }
 
   attachHTTPServer(server: Server, path?: string) {
-    server.on('upgrade', (request, socket, head) => {
+    server.on("upgrade", (request, socket, head) => {
       if (!this.authenticate()) {
-        socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
+        socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n")
         socket.destroy()
         return
       }
@@ -66,7 +69,7 @@ export class WebSocketHTTPServer extends WebSocketServer {
       const { pathname } = parse(request.url)
       if (!path || pathname == path) {
         this.handleUpgrade(request, socket, head, (socket) => {
-          this.emit('connection', socket, request)
+          this.emit("connection", socket, request)
         })
       }
     })
@@ -75,7 +78,7 @@ export class WebSocketHTTPServer extends WebSocketServer {
   processIncomingMessage(message: any, socket: WebSocket) {
     try {
       let messageObject: MessageObject = JSON.parse(message)
-      console.log('[WSS]', socket['remoteAddress'], messageObject?.data)
+      console.log("[WSS]", socket["remoteAddress"], messageObject?.data)
       try {
         if (messageObject.event) this.msg.emit(messageObject.event, messageObject.data, socket)
       } catch (e) {

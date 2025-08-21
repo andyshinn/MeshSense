@@ -1,40 +1,40 @@
 <script module lang="ts">
-  let permissionStatus = window.Notification ? Notification.permission : 'Unsupported'
+let permissionStatus = window.Notification ? Notification.permission : "Unsupported"
 
-  export function requestPermission() {
-    if (!('Notification' in window)) {
-      alert('Notification API not supported!')
-      return
-    }
-    Notification.requestPermission((result) => (permissionStatus = result))
+export function requestPermission() {
+  if (!("Notification" in window)) {
+    alert("Notification API not supported!")
+    return
   }
+  Notification.requestPermission((result) => (permissionStatus = result))
+}
 
-  export function sendNotification() {
-    try {
-      var notification = new Notification('Hi there - non-persistent!')
-    } catch (err) {
-      alert('Notification API error: ' + err)
-    }
+export function sendNotification() {
+  try {
+    var notification = new Notification("Hi there - non-persistent!")
+  } catch (err) {
+    alert("Notification API error: " + err)
   }
+}
 
-  const registerServiceWorker = async () => {
-    if (navigator.serviceWorker) {
-      navigator.serviceWorker
-        .register(`${import.meta.env.VITE_PATH || ''}/sw.js`)
-        .then(function (registration) {
-          console.log('Service worker registration successful:', registration)
-        })
-        .catch(function (error) {
-          console.warn('Service worker registration failed:', error)
-        })
-    }
+const registerServiceWorker = async () => {
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker
+      .register(`${import.meta.env.VITE_PATH || ""}/sw.js`)
+      .then(function (registration) {
+        console.log("Service worker registration successful:", registration)
+      })
+      .catch(function (error) {
+        console.warn("Service worker registration failed:", error)
+      })
   }
+}
 
-  registerServiceWorker()
+registerServiceWorker()
 
-  async function persistentNotification() {
-    navigator.serviceWorker.controller.postMessage({ type: 'buttonClicked' })
-  }
+async function persistentNotification() {
+  navigator.serviceWorker.controller.postMessage({ type: "buttonClicked" })
+}
 </script>
 
 <svelte:head>

@@ -1,8 +1,8 @@
 <!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (title to title_1) making the component unusable -->
 <script>
-  export let title = ''
-  export let tag = 'div'
-  export let horizontal = false
+export let title = ""
+export let tag = "div"
+export let horizontal = false
 </script>
 
 <svelte:element this={tag} class="grid {horizontal ? 'grid-cols-[auto_1fr] ' : 'grid-rows-[auto_1fr]'} overflow-auto {$$restProps.class}" style={$$restProps.style}>

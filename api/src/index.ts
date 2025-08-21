@@ -1,25 +1,43 @@
-import 'dotenv/config'
-import './lib/persistence'
-import { app, createRoutes, finalize, server } from './lib/server'
-import './meshtastic'
-import { connect, disconnect, deleteNodes, requestPosition, send, traceRoute, setPosition, deviceConfig } from './meshtastic'
-import { address, apiPort, currentTime, apiHostname, accessKey, autoConnectOnStartup, meshSenseNewsDate, allowRemoteMessaging } from './vars'
-import { hostname } from 'os'
-import intercept from 'intercept-stdout'
-import { createWriteStream } from 'fs'
-import { dataDirectory } from './lib/paths'
-import { join } from 'path'
-import axios from 'axios'
+import "dotenv/config"
+import "./lib/persistence"
+import { app, createRoutes, finalize, server } from "./lib/server"
+import "./meshtastic"
+import {
+  connect,
+  disconnect,
+  deleteNodes,
+  requestPosition,
+  send,
+  traceRoute,
+  setPosition,
+  deviceConfig,
+} from "./meshtastic"
+import {
+  address,
+  apiPort,
+  currentTime,
+  apiHostname,
+  accessKey,
+  autoConnectOnStartup,
+  meshSenseNewsDate,
+  allowRemoteMessaging,
+} from "./vars"
+import { hostname } from "os"
+import intercept from "intercept-stdout"
+import { createWriteStream } from "fs"
+import { dataDirectory } from "./lib/paths"
+import { join } from "path"
+import axios from "axios"
 setInterval(() => currentTime.set(Date.now()), 15000)
 
-process.on('uncaughtException', (err, origin) => {
-  console.error('[system] Uncaught Exception', err)
+process.on("uncaughtException", (err, origin) => {
+  console.error("[system] Uncaught Exception", err)
 })
 
 let consoleLog = []
 let logSize = 1000
 
-let lastLogStream = createWriteStream(join(dataDirectory, 'lastLog.txt'))
+let lastLogStream = createWriteStream(join(dataDirectory, "lastLog.txt"))
 intercept(
   (text) => {
     lastLogStream.write(text)
@@ -28,27 +46,27 @@ intercept(
     return text
   },
   (err) => {
-    if (typeof err === 'string' && err.includes('Possible EventTarget memory leak detected')) return err
+    if (typeof err === "string" && err.includes("Possible EventTarget memory leak detected")) return err
     consoleLog.push(err)
     while (consoleLog.length >= logSize) consoleLog.shift()
     return err
-  }
+  },
 )
 
 function isAuthorized(req: any) {
-  let token = req.headers['authorization']?.split(' ')[1]
-  console.log('Remote Address', req.socket.remoteAddress)
+  let token = req.headers["authorization"]?.split(" ")[1]
+  console.log("Remote Address", req.socket.remoteAddress)
   return (
-    req.socket.remoteAddress.includes('127.0.0.1') ||
-    req.socket.remoteAddress.includes('ffff') ||
-    req.socket.remoteAddress.includes('localhost') ||
-    req.socket.remoteAddress.includes('::1') ||
-    (accessKey.value != '' && accessKey.value == token)
+    req.socket.remoteAddress.includes("127.0.0.1") ||
+    req.socket.remoteAddress.includes("ffff") ||
+    req.socket.remoteAddress.includes("localhost") ||
+    req.socket.remoteAddress.includes("::1") ||
+    (accessKey.value != "" && accessKey.value == token)
   )
 }
 
 createRoutes((app) => {
-  app.post('/send', (req, res) => {
+  app.post("/send", (req, res) => {
     if (!allowRemoteMessaging.value && !isAuthorized(req)) return res.sendStatus(403)
     let message = req.body.message
     let destination = req.body.destination
@@ -58,51 +76,51 @@ createRoutes((app) => {
     return res.sendStatus(200)
   })
 
-  app.post('/traceRoute', async (req, res) => {
+  app.post("/traceRoute", async (req, res) => {
     let destination = req.body.destination
     await traceRoute(destination)
     return res.sendStatus(200)
   })
 
-  app.post('/requestPosition', async (req, res) => {
+  app.post("/requestPosition", async (req, res) => {
     let destination = req.body.destination
     await requestPosition(destination)
     return res.sendStatus(200)
   })
 
-  app.post('/deleteNodes', async (req, res) => {
+  app.post("/deleteNodes", async (req, res) => {
     if (!isAuthorized(req)) return res.sendStatus(403)
     let nodes = req.body.nodes
     await deleteNodes(nodes)
   })
 
-  app.post('/connect', async (req, res) => {
+  app.post("/connect", async (req, res) => {
     if (!isAuthorized(req)) return res.sendStatus(403)
-    console.log('[express]', '/connect')
+    console.log("[express]", "/connect")
     connect(req.body.address || address.value)
     return res.sendStatus(200)
   })
 
-  app.post('/disconnect', async (req, res) => {
+  app.post("/disconnect", async (req, res) => {
     if (!isAuthorized(req)) return res.sendStatus(403)
-    console.log('[express]', '/disconnect')
+    console.log("[express]", "/disconnect")
     disconnect()
     return res.sendStatus(200)
   })
 
-  app.get('/consoleLog', async (req, res) => {
-    if (req.query.accessKey != accessKey.value && req.hostname.toLowerCase() != 'localhost') return res.sendStatus(403)
+  app.get("/consoleLog", async (req, res) => {
+    if (req.query.accessKey != accessKey.value && req.hostname.toLowerCase() != "localhost") return res.sendStatus(403)
     return res.json(consoleLog)
   })
 
-  app.get('/deviceConfig', async (req, res) => {
-    if (req.query.accessKey != accessKey.value && req.hostname.toLowerCase() != 'localhost') return res.sendStatus(403)
+  app.get("/deviceConfig", async (req, res) => {
+    if (req.query.accessKey != accessKey.value && req.hostname.toLowerCase() != "localhost") return res.sendStatus(403)
     return res.json(deviceConfig)
   })
 
-  app.post('/position', async (req, res) => {
+  app.post("/position", async (req, res) => {
     if (!isAuthorized(req)) return res.sendStatus(403)
-    console.log('[express]', '/position', req.body)
+    console.log("[express]", "/position", req.body)
     setPosition(req.body)
     return res.sendStatus(200)
   })
@@ -122,16 +140,16 @@ createRoutes((app) => {
 
   // ** Check News Update */
   function checkForNews() {
-    console.log('[news] Checking for news')
+    console.log("[news] Checking for news")
     axios
-      .get('https://affirmatech.com/meshSenseNewsDate')
+      .get("https://affirmatech.com/meshSenseNewsDate")
       .then((newDate) => {
         if (meshSenseNewsDate.value < newDate.data) {
           meshSenseNewsDate.set(newDate.data)
         }
       })
       .catch(() => {
-        console.log('[news] Unable to get latest news')
+        console.log("[news] Unable to get latest news")
       })
   }
 

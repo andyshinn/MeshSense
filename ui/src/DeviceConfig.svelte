@@ -1,24 +1,24 @@
 <script lang="ts">
-  import axios from 'axios'
-  import { onDestroy, onMount } from 'svelte'
-  import { userKey } from './lib/util'
+import axios from "axios"
+import { onDestroy, onMount } from "svelte"
+import { userKey } from "./lib/util"
 
-  let deviceConfig = $state({})
-  let keys = $state([])
-  let selectedKey = $state('device')
+let deviceConfig = $state({})
+let keys = $state([])
+let selectedKey = $state("device")
 
-  async function getConfig() {
-    try {
-      deviceConfig = (await axios.get('/deviceConfig', { params: { accessKey: $userKey } })).data
-      keys = Object.keys(deviceConfig).sort()
-    } catch (e) {
-      console.error(e)
-    }
+async function getConfig() {
+  try {
+    deviceConfig = (await axios.get("/deviceConfig", { params: { accessKey: $userKey } })).data
+    keys = Object.keys(deviceConfig).sort()
+  } catch (e) {
+    console.error(e)
   }
+}
 
-  onMount(getConfig)
-  let refreshInterval = setInterval(getConfig, 2000)
-  onDestroy(() => clearInterval(refreshInterval))
+onMount(getConfig)
+let refreshInterval = setInterval(getConfig, 2000)
+onDestroy(() => clearInterval(refreshInterval))
 </script>
 
 <div class="grid grid-cols-[auto_1fr] gap-1">

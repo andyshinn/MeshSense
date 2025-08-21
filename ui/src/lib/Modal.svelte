@@ -1,27 +1,21 @@
 <script lang="ts">
-  import { fade, scale } from 'svelte/transition'
-  interface Props {
-    visible?: boolean;
-    title?: string;
-    fillHeight?: boolean;
-    children?: import('svelte').Snippet;
-    [key: string]: any
-  }
+import { fade, scale } from "svelte/transition"
+interface Props {
+  visible?: boolean
+  title?: string
+  fillHeight?: boolean
+  children?: import("svelte").Snippet
+  [key: string]: any
+}
 
-  let {
-    visible = $bindable(false),
-    title = '',
-    fillHeight = false,
-    children,
-    ...rest
-  }: Props = $props();
+let { visible = $bindable(false), title = "", fillHeight = false, children, ...rest }: Props = $props()
 
-  function handleKeydown(e: KeyboardEvent) {
-    if (visible && e.code == 'Escape') {
-      visible = false
-      e.stopPropagation()
-    }
+function handleKeydown(e: KeyboardEvent) {
+  if (visible && e.code == "Escape") {
+    visible = false
+    e.stopPropagation()
   }
+}
 </script>
 
 <svelte:window onkeydowncapture={handleKeydown} />

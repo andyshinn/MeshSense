@@ -1,17 +1,17 @@
 <script lang="ts">
-  import { State } from 'api/src/lib/state'
-  import Card from './lib/Card.svelte'
-  import { address, connectionStatus } from 'api/src/vars'
-  import { smallMode } from './Nodes.svelte'
-  import axios from 'axios'
-  import { hasAccess } from './lib/util'
-  interface Props {
-    [key: string]: any
-  }
+import { State } from "api/src/lib/state"
+import Card from "./lib/Card.svelte"
+import { address, connectionStatus } from "api/src/vars"
+import { smallMode } from "./Nodes.svelte"
+import axios from "axios"
+import { hasAccess } from "./lib/util"
+interface Props {
+  [key: string]: any
+}
 
-  let { ...rest }: Props = $props();
+let { ...rest }: Props = $props()
 
-  let bluetoothDeviceList = new State<{ id: string; name: string }[]>('bluetoothDeviceList', [])
+let bluetoothDeviceList = new State<{ id: string; name: string }[]>("bluetoothDeviceList", [])
 </script>
 
 {#if $connectionStatus == 'disconnected' && $hasAccess}

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { channels } from 'api/src/vars'
-  let selectedChannelIndex = $state(0)
-  let selectedChannel = $derived($channels?.[selectedChannelIndex])
+import { channels } from "api/src/vars"
+let selectedChannelIndex = $state(0)
+let selectedChannel = $derived($channels?.[selectedChannelIndex])
 
-  function onchange(e) {
-    channels.upsert(selectedChannel)
-  }
+function onchange(e) {
+  channels.upsert(selectedChannel)
+}
 </script>
 
 <div class="grid grid-cols-[auto_1fr] gap-3">

@@ -1,27 +1,32 @@
 <script module lang="ts">
-  import { writable } from 'svelte/store'
-  export let expandedMap = writable(false)
-  export let setPositionMode = writable(false)
-  import { generateHexer } from '@bdancer/icon-gaga'
+import { writable } from "svelte/store"
+export let expandedMap = writable(false)
+export let setPositionMode = writable(false)
+import { generateHexer } from "@bdancer/icon-gaga"
 
-  export function getSvgUri(name: string) {
-    const hexId = parseInt(name).toString(16).padStart(8, '0')
-    const colorId = hexId.slice(-6)
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(generateHexer({
-      name,
-      borderColor: `#${colorId}`
-    }))
-  }
+export function getSvgUri(name: string) {
+  const hexId = parseInt(name).toString(16).padStart(8, "0")
+  const colorId = hexId.slice(-6)
+  return (
+    "data:image/svg+xml;utf8," +
+    encodeURIComponent(
+      generateHexer({
+        name,
+        borderColor: `#${colorId}`,
+      }),
+    )
+  )
+}
 
-  export function getIconURL(node: NodeInfo) {
-    if (node.position?.latitudeI) {
-      if (node?.position?.altitude > 2743) return `${import.meta.env.VITE_PATH || ''}/airplane.svg`
-      else return getSvgUri(String(node.num))
-      // else return `https://icongaga-api.bytedancer.workers.dev/api/genHexer?name=${node.num}`
-    } else {
-      return `${import.meta.env.VITE_PATH || ''}/circle-help.svg`
-    }
+export function getIconURL(node: NodeInfo) {
+  if (node.position?.latitudeI) {
+    if (node?.position?.altitude > 2743) return `${import.meta.env.VITE_PATH || ""}/airplane.svg`
+    else return getSvgUri(String(node.num))
+    // else return `https://icongaga-api.bytedancer.workers.dev/api/genHexer?name=${node.num}`
+  } else {
+    return `${import.meta.env.VITE_PATH || ""}/circle-help.svg`
   }
+}
 </script>
 
 <script lang="ts">

@@ -1,8 +1,8 @@
 <script module lang="ts">
-  import { writable } from 'svelte/store'
-  export let newsVisible = writable(false)
+import { writable } from "svelte/store"
+export let newsVisible = writable(false)
 
-  export let lastViewedNewsDate = Number(localStorage.getItem('lastViewedNewsDate')) || 0
+export let lastViewedNewsDate = Number(localStorage.getItem("lastViewedNewsDate")) || 0
 </script>
 
 <script>

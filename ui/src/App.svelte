@@ -1,22 +1,22 @@
 <script module lang="ts">
-  import axios from 'axios'
-  import Address from './Address.svelte'
-  // import ServiceWorker from './lib/ServiceWorker.svelte'
-  import { WebSocketClient } from './lib/wsc'
-  import Log from './Log.svelte'
-  import Nodes, { smallMode, focusNodeFilter } from './Nodes.svelte'
-  import Map, { expandedMap } from './Map.svelte'
-  import OpenLayersMap from './lib/OpenLayersMap.svelte'
-  import Bluetooth from './Bluetooth.svelte'
-  import Message from './Message.svelte'
-  import { allowRemoteMessaging, connectionStatus, version } from 'api/src/vars'
-  import UpdateStatus from './lib/UpdateStatus.svelte'
-  import SettingsModal from './SettingsModal.svelte'
-  import { hasAccess } from './lib/util'
-  import News, { newsVisible } from './News.svelte'
+import axios from "axios"
+import Address from "./Address.svelte"
+// import ServiceWorker from './lib/ServiceWorker.svelte'
+import { WebSocketClient } from "./lib/wsc"
+import Log from "./Log.svelte"
+import Nodes, { smallMode, focusNodeFilter } from "./Nodes.svelte"
+import Map, { expandedMap } from "./Map.svelte"
+import OpenLayersMap from "./lib/OpenLayersMap.svelte"
+import Bluetooth from "./Bluetooth.svelte"
+import Message from "./Message.svelte"
+import { allowRemoteMessaging, connectionStatus, version } from "api/src/vars"
+import UpdateStatus from "./lib/UpdateStatus.svelte"
+import SettingsModal from "./SettingsModal.svelte"
+import { hasAccess } from "./lib/util"
+import News, { newsVisible } from "./News.svelte"
 
-  export const ws = new WebSocketClient(`${import.meta.env.VITE_PATH || ''}/ws`)
-  axios.defaults.baseURL = import.meta.env.VITE_PATH
+export const ws = new WebSocketClient(`${import.meta.env.VITE_PATH || ""}/ws`)
+axios.defaults.baseURL = import.meta.env.VITE_PATH
 </script>
 
 <script lang="ts">

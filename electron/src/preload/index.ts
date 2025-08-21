@@ -1,23 +1,23 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer } from "electron"
 
 // Minimal electron API for renderer
 const electronAPI = {
   ipcRenderer: {
-    send: (channel: string, ...args: any[]) => ipcRenderer.send(channel, ...args)
+    send: (channel: string, ...args: any[]) => ipcRenderer.send(channel, ...args),
   },
   process: {
-    versions: process.versions
-  }
+    versions: process.versions,
+  },
 }
 
 // Custom APIs for renderer
 const api = {
   onOpenSettings: (callback: () => void) => {
-    ipcRenderer.on('open-settings', callback)
+    ipcRenderer.on("open-settings", callback)
   },
   onFocusNodeFilter: (callback: () => void) => {
-    ipcRenderer.on('focus-node-filter', callback)
-  }
+    ipcRenderer.on("focus-node-filter", callback)
+  },
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
@@ -25,8 +25,8 @@ const api = {
 // just add to the DOM global.
 if (process.contextIsolated) {
   try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
+    contextBridge.exposeInMainWorld("electron", electronAPI)
+    contextBridge.exposeInMainWorld("api", api)
   } catch (error) {
     console.error(error)
   }

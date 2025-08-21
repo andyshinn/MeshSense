@@ -1,10 +1,9 @@
-import js from "@eslint/js";
-import globals from "globals";
-import tseslint from "typescript-eslint";
-import electronToolkitConfig from "@electron-toolkit/eslint-config-ts";
-import electronToolkitPrettierConfig from "@electron-toolkit/eslint-config-prettier";
-import { defineConfig, globalIgnores } from "eslint/config";
-
+import js from "@eslint/js"
+import globals from "globals"
+import tseslint from "typescript-eslint"
+import electronToolkitConfig from "@electron-toolkit/eslint-config-ts"
+import electronToolkitPrettierConfig from "@electron-toolkit/eslint-config-prettier"
+import { defineConfig, globalIgnores } from "eslint/config"
 
 export default defineConfig([
   electronToolkitConfig,
@@ -13,5 +12,5 @@ export default defineConfig([
   { files: ["**/*.js"], languageOptions: { sourceType: "commonjs" } },
   { files: ["**/*.{js,mjs,cjs,ts,mts,cts}"], languageOptions: { globals: globals.browser } },
   tseslint.configs.recommended,
-  globalIgnores(["**/node_modules", "**/dist", "**/out", "**/.gitignore"])
-]);
+  globalIgnores(["**/node_modules", "**/dist", "**/out", "**/.gitignore"]),
+])

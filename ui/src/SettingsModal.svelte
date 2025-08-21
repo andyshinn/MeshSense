@@ -1,11 +1,11 @@
 <script module>
-  export let showConfigModal = writable(false)
-  let modalPage = writable('Settings')
+export let showConfigModal = writable(false)
+let modalPage = writable("Settings")
 
-  export function showPage(pageName = 'Settings') {
-    modalPage.set(pageName)
-    showConfigModal.set(true)
-  }
+export function showPage(pageName = "Settings") {
+  modalPage.set(pageName)
+  showConfigModal.set(true)
+}
 </script>
 
 <script>

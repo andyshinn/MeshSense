@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 #app {
   display: contents;
@@ -97,10 +97,10 @@ button:active {
 }
 
 .ol-layers {
-  transition: filter .3s;
+  transition: filter 0.3s;
 }
 
 .ol-control-darkmode {
   top: 73px;
-  left: .5em;
+  left: 0.5em;
 }

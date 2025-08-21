@@ -1,52 +1,48 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
+import { run } from "svelte/legacy"
 
-  import axios from 'axios'
-  import { hasAccess } from './util'
-  import { State } from 'api/src/lib/state'
-  import { headless } from 'api/src/vars'
-  import { tick } from 'svelte'
+import axios from "axios"
+import { hasAccess } from "./util"
+import { State } from "api/src/lib/state"
+import { headless } from "api/src/vars"
+import { tick } from "svelte"
 
+interface Props {
+  updateStatus?: any
+  status?: string
+  progress?: number
+  version?: string
+  // $: document.title = `MeshSense ${$version ?? 'Development'}`
+  friendlyMessages?: any
+}
 
+let {
+  updateStatus = new State<any>("updateStatus", {}),
+  status = $bindable(""),
+  progress = $bindable(0),
+  version = $bindable(""),
+  friendlyMessages = {
+    "update-available": "New update!",
+    "download-progress": "Downloading Update",
+    "update-downloaded": "Update Ready",
+  },
+}: Props = $props()
 
-  
+run(() => {
+  status = friendlyMessages[$updateStatus.event]
+  progress = $updateStatus.body?.percent
+  version = $updateStatus.body?.version
+})
 
-  interface Props {
-    updateStatus?: any;
-    status?: string;
-    progress?: number;
-    version?: string;
-    // $: document.title = `MeshSense ${$version ?? 'Development'}`
-    friendlyMessages?: any;
-  }
+function installUpdate() {
+  status = "Installing Update"
+  if ($headless) status += ". Please manually restart MeshSense when in headless mode."
+  tick().then(() => {
+    axios.get("/installUpdate", { timeout: 500 })
+  })
+}
 
-  let {
-    updateStatus = new State<any>('updateStatus', {}),
-    status = $bindable(''),
-    progress = $bindable(0),
-    version = $bindable(''),
-    friendlyMessages = {
-    'update-available': 'New update!',
-    'download-progress': 'Downloading Update',
-    'update-downloaded': 'Update Ready'
-  }
-  }: Props = $props();
-
-  run(() => {
-    status = friendlyMessages[$updateStatus.event]
-    progress = $updateStatus.body?.percent
-    version = $updateStatus.body?.version
-  });
-
-  function installUpdate() {
-    status = 'Installing Update'
-    if ($headless) status += '. Please manually restart MeshSense when in headless mode.'
-    tick().then(() => {
-      axios.get('/installUpdate', { timeout: 500 })
-    })
-  }
-
-  //runExample()
+//runExample()
 </script>
 
 {#if status && $hasAccess}

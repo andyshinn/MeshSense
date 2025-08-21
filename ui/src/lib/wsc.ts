@@ -1,17 +1,17 @@
-import { State } from 'api/src/lib/state'
-import EventEmitter from 'eventemitter3'
+import { State } from "api/src/lib/state"
+import EventEmitter from "eventemitter3"
 
 export let events = new EventEmitter()
-events.on('error', (e) => console.error(e))
+events.on("error", (e) => console.error(e))
 
 interface MessageObject {
   event: string
   data: any
 }
 
-export let defaultEndpoint: string = document.URL.replace('http', 'ws').replace(/\?.*/, '') + 'api'
+export let defaultEndpoint: string = document.URL.replace("http", "ws").replace(/\?.*/, "") + "api"
 export let socket: WebSocket | undefined = undefined
-export let status: 'Ready' | 'Connecting' | 'Connected' | 'Disconnected' | 'Closed' = 'Ready'
+export let status: "Ready" | "Connecting" | "Connected" | "Disconnected" | "Closed" = "Ready"
 
 let pendingMessages: MessageObject[] = []
 let reconnectTimeout: number
@@ -21,7 +21,7 @@ export class WebSocketClient {
     if (endpoint) this.connect(endpoint)
     if (syncStates) {
       State.subscribe(({ state, action, args }) => {
-        if (!state.flags.fromRemote) this.send('state', { name: state.name, action, args })
+        if (!state.flags.fromRemote) this.send("state", { name: state.name, action, args })
       })
 
       function setState(name, action, args) {
@@ -31,41 +31,44 @@ export class WebSocketClient {
         State.states[name].flags.fromRemote = false
       }
 
-      events.on('state', ({ name, action, args }) => setState(name, action, args))
-      events.on('initState', (stateData) => {
+      events.on("state", ({ name, action, args }) => setState(name, action, args))
+      events.on("initState", (stateData) => {
         State.defaults = stateData
-        if (stateData) console.log('[ws] Received current state')
+        if (stateData) console.log("[ws] Received current state")
         for (let [name, value] of Object.entries(stateData)) {
-          setState(name, 'set', [value])
+          setState(name, "set", [value])
         }
       })
     }
   }
 
   connect(endpoint = defaultEndpoint, reconnectDelay = 500) {
-    endpoint = endpoint.replace('{{hostname}}', document.location.hostname).replace('http', 'ws').replace('https', 'wss')
+    endpoint = endpoint
+      .replace("{{hostname}}", document.location.hostname)
+      .replace("http", "ws")
+      .replace("https", "wss")
     //if (!browser) return // SvelteKit SSR
     try {
-      status = 'Connecting'
+      status = "Connecting"
       console.log(`Connecting to ${endpoint}`)
       socket = new WebSocket(endpoint)
 
       socket.onclose = (e) => {
         console.log(`Connection closed with ${endpoint}`)
-        status = 'Closed'
+        status = "Closed"
         reconnectTimeout = setTimeout(() => this.connect(endpoint), reconnectDelay + 500)
       }
 
       socket.onopen = (e) => {
         console.log(`Connected to ${endpoint}`)
-        status = 'Connected'
-        events.emit('connect', e)
+        status = "Connected"
+        events.emit("connect", e)
         for (let message of pendingMessages) this.send(message.event, message.data)
       }
       socket.onerror = (e) => {
         console.error(`Failed websocket connection to ${endpoint}`)
-        status = 'Disconnected'
-        events.emit('disconnect', e)
+        status = "Disconnected"
+        events.emit("disconnect", e)
       }
       socket.onmessage = ({ data }) => {
         try {

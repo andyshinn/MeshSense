@@ -1,42 +1,42 @@
 <script lang="ts">
-  import type { NodeInfo } from 'api/src/vars'
-  interface Props {
-    node: NodeInfo;
+import type { NodeInfo } from "api/src/vars"
+interface Props {
+  node: NodeInfo
+}
+
+let { node }: Props = $props()
+
+function calculateRFSNRWidthPercentage(snr: number) {
+  // calculate a relative width percentage to represent a bar of SNR values
+
+  const MIN_WIDTH = 15 // Minimum width percentage
+  const MAX_SNR = 10 // SNR value for 100% width
+  const MIN_SNR = -10 // SNR value corresponding to minimum width
+
+  // Limit SNR within our expected range
+  const clampedSNR = Math.max(MIN_SNR, Math.min(MAX_SNR, snr))
+
+  if (clampedSNR >= MAX_SNR) {
+    return 100 // Maximum width
+  } else {
+    // Linear scale from MIN_WIDTH to 100% based on SNR range
+    // For SNR from -10 to +10, map to width from 10% to 100%
+    const availableRange = 100 - MIN_WIDTH
+    const snrPosition = (clampedSNR - MIN_SNR) / (MAX_SNR - MIN_SNR)
+
+    return MIN_WIDTH + snrPosition * availableRange
   }
+}
 
-  let { node }: Props = $props();
-
-  function calculateRFSNRWidthPercentage(snr: number) {
-    // calculate a relative width percentage to represent a bar of SNR values
-
-    const MIN_WIDTH = 15; // Minimum width percentage
-    const MAX_SNR = 10;   // SNR value for 100% width
-    const MIN_SNR = -10;  // SNR value corresponding to minimum width
-    
-    // Limit SNR within our expected range
-    const clampedSNR = Math.max(MIN_SNR, Math.min(MAX_SNR, snr));
-    
-    if (clampedSNR >= MAX_SNR) {
-      return 100; // Maximum width
-    } else {
-      // Linear scale from MIN_WIDTH to 100% based on SNR range
-      // For SNR from -10 to +10, map to width from 10% to 100%
-      const availableRange = 100 - MIN_WIDTH;
-      const snrPosition = (clampedSNR - MIN_SNR) / (MAX_SNR - MIN_SNR);
-      
-      return MIN_WIDTH + (snrPosition * availableRange);
-    }
-  }
-
-  function getRFSNRColor(snr: number) {
-    // determine which color to use for the SNR bar values
-    if (snr >= 4) return 'bg-green-500'
-    if (snr >= 0) return 'bg-[#9acd32]'
-    if (snr >= -3) return 'bg-yellow-500'
-    if (snr >= -6) return 'bg-orange-500'
-    if (snr >= -9) return 'bg-red-500'
-    return 'bg-[red]'
-  }
+function getRFSNRColor(snr: number) {
+  // determine which color to use for the SNR bar values
+  if (snr >= 4) return "bg-green-500"
+  if (snr >= 0) return "bg-[#9acd32]"
+  if (snr >= -3) return "bg-yellow-500"
+  if (snr >= -6) return "bg-orange-500"
+  if (snr >= -9) return "bg-red-500"
+  return "bg-[red]"
+}
 </script>
 
 

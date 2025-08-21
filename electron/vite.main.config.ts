@@ -1,18 +1,18 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from "vite"
 
 export default defineConfig({
   build: {
-    target: 'node20',
+    target: "node20",
     lib: {
-      entry: 'src/main/index.ts',
-      formats: ['cjs'],
-      fileName: () => 'main.js',
+      entry: "src/main/index.ts",
+      formats: ["cjs"],
+      fileName: () => "main.js",
     },
     rollupOptions: {
-      external: ['electron'],
+      external: ["electron"],
     },
   },
   resolve: {
-    mainFields: ['module', 'jsnext:main', 'jsnext'],
+    mainFields: ["module", "jsnext:main", "jsnext"],
   },
-});
+})

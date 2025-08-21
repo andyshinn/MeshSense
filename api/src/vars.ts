@@ -1,34 +1,36 @@
-import { State } from './lib/state'
+import { State } from "./lib/state"
 
-export let version = new State('version', '')
-export let headless = new State('headless', '')
-export let address = new State('address', '', { persist: 'api' })
-export let connectionStatus = new State<'connected' | 'connecting' | 'disconnected' | 'searching' | 'configuring' | 'reconnecting'>('connectionStatus', 'disconnected')
-export let lastFromRadio = new State('lastFromRadio', undefined, { hideLog: true })
-export let channels = new State<Channel[]>('channels', [], { primaryKey: 'index', hideLog: true })
-export let packets = new State<MeshPacket[]>('packets', [], { hideLog: true })
-export let nodes = new State<NodeInfo[]>('nodes', [], { primaryKey: 'num', hideLog: true })
-export let currentTime = new State<number>('currentTime', Date.now(), { hideLog: true })
-export let myNodeNum = new State<number>('myNodeNum')
+export let version = new State("version", "")
+export let headless = new State("headless", "")
+export let address = new State("address", "", { persist: "api" })
+export let connectionStatus = new State<
+  "connected" | "connecting" | "disconnected" | "searching" | "configuring" | "reconnecting"
+>("connectionStatus", "disconnected")
+export let lastFromRadio = new State("lastFromRadio", undefined, { hideLog: true })
+export let channels = new State<Channel[]>("channels", [], { primaryKey: "index", hideLog: true })
+export let packets = new State<MeshPacket[]>("packets", [], { hideLog: true })
+export let nodes = new State<NodeInfo[]>("nodes", [], { primaryKey: "num", hideLog: true })
+export let currentTime = new State<number>("currentTime", Date.now(), { hideLog: true })
+export let myNodeNum = new State<number>("myNodeNum")
 export let broadcastId = 4294967295
-export let myNodeMetadata = new State<DeviceMetadata>('myNodeMetadata')
-export let accessKey = new State<string>('accessKey', undefined, { persist: true, hideLog: true })
-export let packetLimit = new State<number>('packetLimit', 500, { persist: true })
-export let apiHostname = new State<string>('apiHostname', undefined, { hideLog: true })
-export let apiPort = new State<string>('apiPort', undefined, { hideLog: true })
-export let messagePrefix = new State<string>('messagePrefix', undefined, { persist: true })
-export let messageSuffix = new State<string>('messageSuffix', undefined, { persist: true })
-export let allowRemoteMessaging = new State<boolean>('allowRemoteMessaging', false, { persist: true })
-export let autoConnectOnStartup = new State<boolean>('autoConnectOnStartup', true, { persist: true })
-export let enableTLS = new State<boolean>('enableTLS', false, { persist: true })
-export let automaticTraceroutes = new State<boolean>('automaticTraceroutes', true, { persist: true })
-export let meshSenseNewsDate = new State<number>('meshSenseNewsDate', 0, { persist: true })
-export let pendingTraceroutes = new State<number[]>('pendingTraceroutes', [], { hideLog: true })
-export let meshMapForwarding = new State<boolean>('meshMapForwarding', false, { hideLog: true, persist: true })
+export let myNodeMetadata = new State<DeviceMetadata>("myNodeMetadata")
+export let accessKey = new State<string>("accessKey", undefined, { persist: true, hideLog: true })
+export let packetLimit = new State<number>("packetLimit", 500, { persist: true })
+export let apiHostname = new State<string>("apiHostname", undefined, { hideLog: true })
+export let apiPort = new State<string>("apiPort", undefined, { hideLog: true })
+export let messagePrefix = new State<string>("messagePrefix", undefined, { persist: true })
+export let messageSuffix = new State<string>("messageSuffix", undefined, { persist: true })
+export let allowRemoteMessaging = new State<boolean>("allowRemoteMessaging", false, { persist: true })
+export let autoConnectOnStartup = new State<boolean>("autoConnectOnStartup", true, { persist: true })
+export let enableTLS = new State<boolean>("enableTLS", false, { persist: true })
+export let automaticTraceroutes = new State<boolean>("automaticTraceroutes", true, { persist: true })
+export let meshSenseNewsDate = new State<number>("meshSenseNewsDate", 0, { persist: true })
+export let pendingTraceroutes = new State<number[]>("pendingTraceroutes", [], { hideLog: true })
+export let meshMapForwarding = new State<boolean>("meshMapForwarding", false, { hideLog: true, persist: true })
 
 /** Measured in minutes */
-export let tracerouteRateLimit = new State<number>('tracerouteRateLimit', 60, { persist: true })
-export let nodeInactiveTimer = new State<number>('nodeInactiveTimer', 60, { persist: true })
+export let tracerouteRateLimit = new State<number>("tracerouteRateLimit", 60, { persist: true })
+export let nodeInactiveTimer = new State<number>("nodeInactiveTimer", 60, { persist: true })
 
 export type DeviceMetadata = {
   firmwareVersion: string

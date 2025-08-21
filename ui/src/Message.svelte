@@ -1,6 +1,6 @@
 <script lang="ts" module>
-  import { writable } from 'svelte/store'
-  export let messageDestination = writable(0)
+import { writable } from "svelte/store"
+export let messageDestination = writable(0)
 </script>
 
 <script lang="ts">

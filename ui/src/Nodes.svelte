@@ -1,18 +1,26 @@
 <script module lang="ts">
-  import { currentTime, myNodeMetadata, myNodeNum, nodeInactiveTimer, nodes, pendingTraceroutes, type NodeInfo } from 'api/src/vars'
-  export let smallMode = writable(false)
-  export let selectNodeFilterInput = writable(false)
-  export let nodeVisibilityMode = writable<string>(localStorage.getItem('nodeVisibilityMode') ?? 'active')
-  export let sortField = writable<string>(localStorage.getItem('sortField') ?? 'lastHeard')
-  export let sortDirection = writable<'asc' | 'desc'>((localStorage.getItem('sortDirection') as 'asc' | 'desc') ?? 'desc')
+import {
+  currentTime,
+  myNodeMetadata,
+  myNodeNum,
+  nodeInactiveTimer,
+  nodes,
+  pendingTraceroutes,
+  type NodeInfo,
+} from "api/src/vars"
+export let smallMode = writable(false)
+export let selectNodeFilterInput = writable(false)
+export let nodeVisibilityMode = writable<string>(localStorage.getItem("nodeVisibilityMode") ?? "active")
+export let sortField = writable<string>(localStorage.getItem("sortField") ?? "lastHeard")
+export let sortDirection = writable<"asc" | "desc">((localStorage.getItem("sortDirection") as "asc" | "desc") ?? "desc")
 
-  export function isInactive(node: NodeInfo) {
-    return Date.now() - node.lastHeard * 1000 >= (nodeInactiveTimer.value ?? 60) * 60 * 1000
-  }
+export function isInactive(node: NodeInfo) {
+  return Date.now() - node.lastHeard * 1000 >= (nodeInactiveTimer.value ?? 60) * 60 * 1000
+}
 
-  export function focusNodeFilter() {
-    selectNodeFilterInput.set(true)
-  }
+export function focusNodeFilter() {
+  selectNodeFilterInput.set(true)
+}
 </script>
 
 <script lang="ts">

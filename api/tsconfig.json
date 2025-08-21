@@ -7,11 +7,7 @@
     "emitDecoratorMetadata": true,
     "module": "esnext",
     "moduleResolution": "Bundler",
-    "types": [
-      "node",
-      "web-bluetooth",
-      "w3c-web-serial"
-    ],
+    "types": ["node", "web-bluetooth", "w3c-web-serial"],
     "allowJs": true,
     "outDir": "./dist",
     "noEmit": true,

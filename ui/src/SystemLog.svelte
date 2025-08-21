@@ -1,32 +1,32 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
+import { run } from "svelte/legacy"
 
-  import axios from 'axios'
-  import { onDestroy, onMount, tick } from 'svelte'
-  import { scrollToBottom, userKey } from './lib/util'
-  import { AnsiUp } from 'ansi_up'
+import axios from "axios"
+import { onDestroy, onMount, tick } from "svelte"
+import { scrollToBottom, userKey } from "./lib/util"
+import { AnsiUp } from "ansi_up"
 
-  let ansi = new AnsiUp()
+let ansi = new AnsiUp()
 
-  let log: string[] = $state([])
-  let logElement: HTMLPreElement = $state()
+let log: string[] = $state([])
+let logElement: HTMLPreElement = $state()
 
-  run(() => {
-    if (log && logElement) scrollToBottom(logElement)
-  });
+run(() => {
+  if (log && logElement) scrollToBottom(logElement)
+})
 
-  async function getLog() {
-    try {
-      log = (await axios.get('/consoleLog', { params: { accessKey: $userKey } })).data
-      // console.log(typeof log)
-    } catch (e) {
-      console.error(e)
-    }
+async function getLog() {
+  try {
+    log = (await axios.get("/consoleLog", { params: { accessKey: $userKey } })).data
+    // console.log(typeof log)
+  } catch (e) {
+    console.error(e)
   }
+}
 
-  onMount(getLog)
-  let refreshInterval = setInterval(getLog, 500)
-  onDestroy(() => clearInterval(refreshInterval))
+onMount(getLog)
+let refreshInterval = setInterval(getLog, 500)
+onDestroy(() => clearInterval(refreshInterval))
 </script>
 
 <div class="flex flex-col gap-4">

@@ -1,95 +1,108 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
+import { run } from "svelte/legacy"
 
-  import { broadcastId, channels, myNodeNum, nodes, packets, version, type MeshPacket } from 'api/src/vars'
-  import Card from './lib/Card.svelte'
-  import { getNodeById, getNodeName, getNodeNameById, scrollToBottom, testPacket } from './lib/util'
-  import Modal from './lib/Modal.svelte'
-  import { messageDestination } from './Message.svelte'
-  import OpenLayersMap from './lib/OpenLayersMap.svelte'
-  import { tick } from 'svelte'
-  import { getSvgUri } from './Map.svelte'
-  import { highlightOwnNode } from './Settings.svelte'
+import { broadcastId, channels, myNodeNum, nodes, packets, version, type MeshPacket } from "api/src/vars"
+import Card from "./lib/Card.svelte"
+import { getNodeById, getNodeName, getNodeNameById, scrollToBottom, testPacket } from "./lib/util"
+import Modal from "./lib/Modal.svelte"
+import { messageDestination } from "./Message.svelte"
+import OpenLayersMap from "./lib/OpenLayersMap.svelte"
+import { tick } from "svelte"
+import { getSvgUri } from "./Map.svelte"
+import { highlightOwnNode } from "./Settings.svelte"
 
-  function shouldPacketBeShown(packet: MeshPacket, includeTx, filterText: string) {
-    if (filterText) {
-      if (!(getNodeNameById(packet.from).toLowerCase().includes(filterText.toLowerCase()) || getNodeNameById(packet.to).toLowerCase().includes(filterText.toLowerCase()))) return false
-    }
-    if (!includeTx && packet.from == $myNodeNum && !packet.data && !packet.message) return false
-    if (!includeTx && packet.data?.$typeName == 'meshtastic.Telemetry' && packet.from == $myNodeNum) return false
-    if (!includeTx && packet.data?.$typeName == 'meshtastic.Routing') return false
-    return true
+function shouldPacketBeShown(packet: MeshPacket, includeTx, filterText: string) {
+  if (filterText) {
+    if (
+      !(
+        getNodeNameById(packet.from).toLowerCase().includes(filterText.toLowerCase()) ||
+        getNodeNameById(packet.to).toLowerCase().includes(filterText.toLowerCase())
+      )
+    )
+      return false
   }
+  if (!includeTx && packet.from == $myNodeNum && !packet.data && !packet.message) return false
+  if (!includeTx && packet.data?.$typeName == "meshtastic.Telemetry" && packet.from == $myNodeNum) return false
+  if (!includeTx && packet.data?.$typeName == "meshtastic.Routing") return false
+  return true
+}
 
-  let packetsDiv: HTMLDivElement = $state()
-  let includeTx = $state(false)
-  let messagesOnly = $state(false)
-  let selectedPacket: MeshPacket = $state()
-  let filterText = $state('')
-  let unseenMessages = $state(false)
-  let showCsvModal = $state(false)
-  let csvText: string = $state()
-  let csvTextElement: HTMLPreElement = $state()
-  interface Props {
-    ol?: OpenLayersMap;
-    [key: string]: any
-  }
+let packetsDiv: HTMLDivElement = $state()
+let includeTx = $state(false)
+let messagesOnly = $state(false)
+let selectedPacket: MeshPacket = $state()
+let filterText = $state("")
+let unseenMessages = $state(false)
+let showCsvModal = $state(false)
+let csvText: string = $state()
+let csvTextElement: HTMLPreElement = $state()
+interface Props {
+  ol?: OpenLayersMap
+  [key: string]: any
+}
 
-  let { ol = undefined, ...rest }: Props = $props();
+let { ol = undefined, ...rest }: Props = $props()
 
+function selectCSV() {
+  window.getSelection().selectAllChildren(csvTextElement)
+}
 
-  function selectCSV() {
-    window.getSelection().selectAllChildren(csvTextElement)
-  }
-
-  /** Generate CSV text based on the html content in the packetsDiv */
-  function generateCSV() {
-    try {
-      let log = []
-      log.push('Date,Nodes,Channel,SNR,RSSI,Type,Hops,Data')
-      for (let packetDiv of packetsDiv.children) {
-        if (packetDiv.children?.length < 7) continue
-        let line = []
-        for (let index of [0, 1, 2, 3, 4, 5, 6, 8]) {
-          line.push(`"${packetDiv.children[index]?.textContent.trim() || ''}"`)
-        }
-        log.push(line.join(','))
+/** Generate CSV text based on the html content in the packetsDiv */
+function generateCSV() {
+  try {
+    let log = []
+    log.push("Date,Nodes,Channel,SNR,RSSI,Type,Hops,Data")
+    for (let packetDiv of packetsDiv.children) {
+      if (packetDiv.children?.length < 7) continue
+      let line = []
+      for (let index of [0, 1, 2, 3, 4, 5, 6, 8]) {
+        line.push(`"${packetDiv.children[index]?.textContent.trim() || ""}"`)
       }
-      showCsvModal = true
-      csvText = log.join('\n')
-    } catch (e) {
-      console.error('Unable to generate CSV', e)
+      log.push(line.join(","))
     }
+    showCsvModal = true
+    csvText = log.join("\n")
+  } catch (e) {
+    console.error("Unable to generate CSV", e)
   }
+}
 
-  function getType(packet: MeshPacket) {
-    if (packet.payloadVariant?.case == 'encrypted') return 'Encrypted'
-    if (packet.message) return 'Message'
-    return (packet.data?.variant?.value?.$typeName ?? packet.data?.$typeName)?.replace('meshtastic.', '')
-  }
+function getType(packet: MeshPacket) {
+  if (packet.payloadVariant?.case == "encrypted") return "Encrypted"
+  if (packet.message) return "Message"
+  return (packet.data?.variant?.value?.$typeName ?? packet.data?.$typeName)?.replace("meshtastic.", "")
+}
 
-  function showPin(packet: MeshPacket) {
-    let node = getNodeById(packet.from)
-    let description = getNodeName(node)
-    let icon = getSvgUri(String(node.num))
-    if (packet.rxTime) {
-      description += ' (' + new Date(packet.rxTime * 1000).toLocaleString(undefined, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: 'numeric' }) + ')'
-    }
-    let lat = packet.data.latitudeI / 10000000
-    let long = packet.data.longitudeI / 10000000
-    ol.showPin(description, long, lat, icon)
+function showPin(packet: MeshPacket) {
+  let node = getNodeById(packet.from)
+  let description = getNodeName(node)
+  let icon = getSvgUri(String(node.num))
+  if (packet.rxTime) {
+    description +=
+      " (" +
+      new Date(packet.rxTime * 1000).toLocaleString(undefined, {
+        day: "numeric",
+        month: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      }) +
+      ")"
   }
-  run(() => {
-    if ($packets) scrollToBottom(packetsDiv, false, (unseen) => (unseenMessages = unseen))
-  });
-  run(() => {
-    messagesOnly, scrollToBottom(packetsDiv, true, (unseen) => (unseenMessages = unseen))
-  });
-  run(() => {
-    if (showCsvModal) {
-      tick().then(selectCSV)
-    }
-  });
+  let lat = packet.data.latitudeI / 10000000
+  let long = packet.data.longitudeI / 10000000
+  ol.showPin(description, long, lat, icon)
+}
+run(() => {
+  if ($packets) scrollToBottom(packetsDiv, false, (unseen) => (unseenMessages = unseen))
+})
+run(() => {
+  messagesOnly, scrollToBottom(packetsDiv, true, (unseen) => (unseenMessages = unseen))
+})
+run(() => {
+  if (showCsvModal) {
+    tick().then(selectCSV)
+  }
+})
 </script>
 
 <Modal title="Packet Detail" visible={selectedPacket != undefined}>

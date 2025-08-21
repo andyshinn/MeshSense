@@ -1,51 +1,51 @@
 <script lang="ts">
-  import { run, preventDefault } from 'svelte/legacy';
+import { run, preventDefault } from "svelte/legacy"
 
-  import { connectionStatus, address, enableTLS, myNodeMetadata, myNodeNum, nodes, lastFromRadio } from 'api/src/vars'
-  import Card from './lib/Card.svelte'
-  import { smallMode } from './Nodes.svelte'
-  import { hasAccess } from './lib/util'
-  import axios from 'axios'
-  interface Props {
-    [key: string]: any
+import { connectionStatus, address, enableTLS, myNodeMetadata, myNodeNum, nodes, lastFromRadio } from "api/src/vars"
+import Card from "./lib/Card.svelte"
+import { smallMode } from "./Nodes.svelte"
+import { hasAccess } from "./lib/util"
+import axios from "axios"
+interface Props {
+  [key: string]: any
+}
+
+let { ...rest }: Props = $props()
+
+let connectionIcons = {
+  connected: "🟢",
+  connecting: "🟡",
+  configuring: "🟡",
+  searching: "🟡",
+  reconnecting: "🟡",
+  disconnected: "🔴",
+}
+
+function connect() {
+  axios.post("/connect", { address: $address })
+}
+
+function disconnect() {
+  axios.post("/disconnect")
+}
+
+let spinnerAngle = $state(0)
+let animationInterval: number | undefined
+
+run(() => {
+  // Clear any existing interval
+  if (animationInterval) {
+    clearInterval(animationInterval)
+    animationInterval = undefined
   }
 
-  let { ...rest }: Props = $props();
-
-  let connectionIcons = {
-    connected: '🟢',
-    connecting: '🟡',
-    configuring: '🟡',
-    searching: '🟡',
-    reconnecting: '🟡',
-    disconnected: '🔴'
+  // Start animation if configuring
+  if ($lastFromRadio && $connectionStatus == "configuring") {
+    animationInterval = setInterval(() => {
+      spinnerAngle = (spinnerAngle + 8) % 360
+    }, 50) // Update every 50ms for smooth animation
   }
-
-  function connect() {
-    axios.post('/connect', { address: $address })
-  }
-
-  function disconnect() {
-    axios.post('/disconnect')
-  }
-
-  let spinnerAngle = $state(0)
-  let animationInterval: number | undefined
-
-  run(() => {
-    // Clear any existing interval
-    if (animationInterval) {
-      clearInterval(animationInterval)
-      animationInterval = undefined
-    }
-    
-    // Start animation if configuring
-    if ($lastFromRadio && $connectionStatus == 'configuring') {
-      animationInterval = setInterval(() => {
-        spinnerAngle = (spinnerAngle + 8) % 360
-      }, 50) // Update every 50ms for smooth animation
-    }
-  });
+})
 </script>
 
 <Card title="Address" {...rest}>

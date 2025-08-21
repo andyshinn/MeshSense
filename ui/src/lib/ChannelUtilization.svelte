@@ -1,24 +1,26 @@
 <script lang="ts">
-  import type { NodeInfo } from 'api/src/vars'
-  interface Props {
-    node: NodeInfo;
-  }
+import type { NodeInfo } from "api/src/vars"
+interface Props {
+  node: NodeInfo
+}
 
-  let { node }: Props = $props();
+let { node }: Props = $props()
 
-  let channelUtilizationINT = $derived(node?.deviceMetrics?.channelUtilization ? Math.floor(node.deviceMetrics.channelUtilization) : null)
+let channelUtilizationINT = $derived(
+  node?.deviceMetrics?.channelUtilization ? Math.floor(node.deviceMetrics.channelUtilization) : null,
+)
 
-  let scaledHeight = $derived(channelUtilizationINT !== null ? Math.min(channelUtilizationINT * 2, 100) : 0)
+let scaledHeight = $derived(channelUtilizationINT !== null ? Math.min(channelUtilizationINT * 2, 100) : 0)
 
-  function getColorClass(channelUtilizationINT: number) {
-    if (!channelUtilizationINT) return 'grayscale' // default color when channelUtilizationINT is null
-    if (channelUtilizationINT < 15) return 'bg-green-500'
-    if (channelUtilizationINT < 20) return 'bg-[#9acd32]'
-    if (channelUtilizationINT < 25) return 'bg-yellow-500'
-    if (channelUtilizationINT < 30) return 'bg-orange-500'
-    if (channelUtilizationINT < 35) return 'bg-red-500'
-    return 'bg-[red]'
-  }
+function getColorClass(channelUtilizationINT: number) {
+  if (!channelUtilizationINT) return "grayscale" // default color when channelUtilizationINT is null
+  if (channelUtilizationINT < 15) return "bg-green-500"
+  if (channelUtilizationINT < 20) return "bg-[#9acd32]"
+  if (channelUtilizationINT < 25) return "bg-yellow-500"
+  if (channelUtilizationINT < 30) return "bg-orange-500"
+  if (channelUtilizationINT < 35) return "bg-red-500"
+  return "bg-[red]"
+}
 </script>
 
 <div
