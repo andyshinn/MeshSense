@@ -4,7 +4,7 @@ on:
   push:
     branches: [master, ashinn/combined]
   pull_request:
-    branches: [master]
+    branches: [master, ashinn/combined]
 
 jobs:
   build:
