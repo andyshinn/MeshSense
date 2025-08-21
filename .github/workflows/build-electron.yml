@@ -26,11 +26,6 @@ jobs:
         with:
           node-version: 22.x
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
       - name: Install dbus on Ubuntu
         if: ${{ runner.os == 'Linux' }}
         run: |
@@ -39,10 +34,10 @@ jobs:
 
 
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
 
       - name: Build all workspaces
-        run: pnpm run build
+        run: npm run build
 
       - name: Set build arch
         id: set_arch
@@ -57,7 +52,7 @@ jobs:
           fi
 
       - name: Build Electron app
-        run: pnpm run build:${{ steps.set_arch.outputs.arch }}
+        run: npm run build:${{ steps.set_arch.outputs.arch }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4

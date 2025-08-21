@@ -1,5 +1,14 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
+
+// Minimal electron API for renderer
+const electronAPI = {
+  ipcRenderer: {
+    send: (channel: string, ...args: any[]) => ipcRenderer.send(channel, ...args)
+  },
+  process: {
+    versions: process.versions
+  }
+}
 
 // Custom APIs for renderer
 const api = {

@@ -5,6 +5,8 @@ import json from '@rollup/plugin-json'
 import copy from 'rollup-plugin-copy'
 import { defineConfig } from 'rollup'
 import { platform, arch } from 'node:os'
+import { resolve } from 'node:path'
+import { existsSync } from 'node:fs'
 
 const externals = [
   '@mikro-orm/sqlite',
@@ -40,10 +42,38 @@ export default defineConfig({
   },
   external: externals,
   plugins: [
+    // We need to force getting the precompiled .mjs or .js for @meshtastic packages until they supply the .ts files for us to compile
+    {
+      name: 'meshtastic-resolver',
+      resolveId(id) {
+        if (id.startsWith('@meshtastic/')) {
+          // Check for both .mjs and .js files in dist
+          const mjsPath = resolve(`../node_modules/${id}/dist/mod.mjs`)
+          const jsPath = resolve(`../node_modules/${id}/dist/mod.js`)
+
+          let resolvedPath
+          if (existsSync(mjsPath)) {
+            resolvedPath = mjsPath
+          } else if (existsSync(jsPath)) {
+            resolvedPath = jsPath
+          } else {
+            console.warn(`Could not find mod file for ${id}`)
+            return null
+          }
+
+          return {
+            id: resolvedPath,
+            external: false
+          }
+        }
+        return null
+      }
+    },
     typescript({
       target: 'esnext',
-      tsconfig: './tsconfig.json',
-      sourceMap: false
+      sourceMap: false,
+      noCheck: true,
+      outputToFilesystem: false,
     }),
     nodeResolve({
       preferBuiltins: true,
@@ -69,11 +99,6 @@ export default defineConfig({
         {
           src: 'dist/static/**/*',
           dest: '../electron/resources/api/static'
-        },
-        {
-          src: 'dist/simpleble.node',
-          dest: `../electron/prebuilds/simpleble-${platform()}-${arch()}`,
-          rename: 'node-napi-v6.node'
         }
       ],
       hook: 'writeBundle'

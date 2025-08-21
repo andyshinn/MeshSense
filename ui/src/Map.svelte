@@ -7,7 +7,7 @@
   export function getSvgUri(name: string) {
     const hexId = parseInt(name).toString(16).padStart(8, '0')
     const colorId = hexId.slice(-6)
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(generateHexer({ 
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(generateHexer({
       name,
       borderColor: `#${colorId}`
     }))
@@ -27,8 +27,8 @@
 <script lang="ts">
   import { run } from 'svelte/legacy';
 
-  import { connectionStatus, myNodeNum, version, type NodeInfo } from 'api/src/vars'
-  import { filteredNodes, isInactive, nodeVisibilityMode } from './Nodes.svelte'
+  import { connectionStatus, myNodeNum, version, nodes, type NodeInfo } from 'api/src/vars'
+  import { isInactive, nodeVisibilityMode } from './Nodes.svelte'
   import Card from './lib/Card.svelte'
   import OpenLayersMap from './lib/OpenLayersMap.svelte'
   import { getCoordinates, getNodeById, getNodeName, getNodeNameById, setPosition } from './lib/util'
@@ -42,7 +42,21 @@
 
   let { ol = $bindable(undefined), ...rest }: Props = $props();
 
-  let nodesWithCoords = $derived($filteredNodes.filter((n) => !(n.position?.latitudeI == undefined || n.position?.latitudeI == 0) || n.approximatePosition))
+  let nodesWithCoords = $derived.by(() => {
+    return $nodes
+      .filter((node) => {
+        switch ($nodeVisibilityMode) {
+          case 'inactive':
+            return isInactive(node)
+          case 'all':
+            return true
+          case 'active':
+          default:
+            return node.num === $myNodeNum || !isInactive(node)
+        }
+      })
+      .filter((n) => !(n.position?.latitudeI == undefined || n.position?.latitudeI == 0) || n.approximatePosition)
+  })
 
   function plotData() {
     let myNodeCoords = getCoordinates($myNodeNum)

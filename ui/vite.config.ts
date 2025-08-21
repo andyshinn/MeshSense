@@ -10,7 +10,15 @@ export default defineConfig({
     strictPort: true  // Fails if port is already in use so we don't run multiple servers
   },
   build: {
-    sourcemap: true
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          svelte: ['svelte', 'svelte/internal'],
+          axios: ['axios']
+        }
+      }
+    }
   },
   // plugins: [basicSsl(), svelte()]
   plugins: [svelte()]

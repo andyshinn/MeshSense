@@ -6,17 +6,16 @@
 <script lang="ts">
   import { run, preventDefault } from 'svelte/legacy';
 
-  import { channels, messagePrefix, messageSuffix } from 'api/src/vars'
+  import { channels, messagePrefix, messageSuffix, nodes, myNodeNum } from 'api/src/vars'
   import Card from './lib/Card.svelte'
-  import { filteredNodes, smallMode } from './Nodes.svelte'
+  import { smallMode, isInactive } from './Nodes.svelte'
   import axios from 'axios'
   import { getNodeName } from './lib/util'
 
   let inputElement: HTMLInputElement = $state()
-
   let maxLength = $derived(230 - $messagePrefix?.length - $messageSuffix?.length)
-
   let message = $state('')
+  let filteredNodes = $derived($nodes.filter((node) => node.num === $myNodeNum || !isInactive(node)))
 
   run(() => {
     if (inputElement && $messageDestination) {
@@ -56,7 +55,7 @@
         {/each}
 
         <option disabled>== Nodes ==</option>
-        {#each [...$filteredNodes].sort((a, b) => {
+        {#each [...filteredNodes].sort((a, b) => {
           return getNodeName(a).localeCompare(getNodeName(b))
         }) as node}
           <option value={node.num}>{getNodeName(node)}</option>
