@@ -1,6 +1,6 @@
-import { BrowserWindow, app } from "electron"
-import { join } from "path"
+import { app, type BrowserWindow } from "electron"
 import { keyFileStorage } from "key-file-storage"
+import { join } from "path"
 
 const userDataPath = app.getPath("userData")
 const windowStateKfs = keyFileStorage(join(userDataPath, "window-state"))

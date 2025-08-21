@@ -1,14 +1,14 @@
 import "dotenv/config"
 import express, { type Express } from "express"
-import { WebSocketHTTPServer } from "./wss"
-import { State } from "./state"
+import getPort from "get-port"
+import type { IncomingMessage, Server, ServerResponse } from "http"
 // import https from 'https'
 // import pem from 'pem'
 // import { store } from './persistence'
 import { createProxyMiddleware } from "http-proxy-middleware"
 import { staticDirectory } from "./paths"
-import getPort from "get-port"
-import { IncomingMessage, Server, ServerResponse } from "http"
+import { State } from "./state"
+import { WebSocketHTTPServer } from "./wss"
 
 // async function createCertificate(options: pem.CertificateCreationOptions, originalKeys?: any): Promise<pem.CertificateCreationResult> {
 //   return new Promise((success, fail) => {
@@ -48,12 +48,12 @@ process.on("unhandledRejection", (reason, promise) => {
   console.error(String(reason))
 })
 
-export let version = new State("version", "")
-export let headless = new State("headless", "")
-export let updateChannel = new State("updateChannel", undefined, { persist: true })
-export let updateStatus = new State("updateStatus", {})
+export const version = new State("version", "")
+export const headless = new State("headless", "")
+export const updateChannel = new State("updateChannel", undefined, { persist: true })
+export const updateStatus = new State("updateStatus", {})
 
-export let app: Express = express()
+export const app: Express = express()
 app.use(express.json({ limit: "500mb" }))
 
 export let server: Server<typeof IncomingMessage, typeof ServerResponse>
@@ -79,7 +79,7 @@ async function initSever() {
   })
 
   // Enable CORS (https://stackoverflow.com/a/18311469)
-  app.use(function (req, res, next) {
+  app.use((req, res, next) => {
     // Website you wish to allow to connect
     res.setHeader("Access-Control-Allow-Origin", "*")
 
@@ -100,7 +100,7 @@ async function initSever() {
   app.get("/state", (_, res) => res.json(State.getStateData()))
 
   // Electron Hook if present
-  let parentPort = process["parentPort"]
+  const parentPort = process["parentPort"]
 
   parentPort?.on("message", (e: any) => {
     console.log("[electron to api]", e)
@@ -153,7 +153,7 @@ export default { app, server, wss, finalize }
 
 /** When in development, proxy UI route instead of serving static files */
 function enableDevProxy() {
-  let wsProxy = createProxyMiddleware({
+  const wsProxy = createProxyMiddleware({
     target: process.env.DEV_UI_URL,
     changeOrigin: true,
     ws: true,

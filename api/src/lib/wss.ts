@@ -1,14 +1,14 @@
-import WebSocket, { WebSocketServer } from "ws"
-import { IncomingMessage, Server } from "http"
-import { parse } from "url"
 import EventEmitter from "eventemitter3"
+import type { IncomingMessage, Server } from "http"
+import { parse } from "url"
+import WebSocket, { WebSocketServer } from "ws"
 
 export interface MessageObject {
   event?: string
   data: any
 }
 
-export let events = new EventEmitter()
+export const events = new EventEmitter()
 
 /**
  * ```
@@ -77,7 +77,7 @@ export class WebSocketHTTPServer extends WebSocketServer {
 
   processIncomingMessage(message: any, socket: WebSocket) {
     try {
-      let messageObject: MessageObject = JSON.parse(message)
+      const messageObject: MessageObject = JSON.parse(message)
       console.log("[WSS]", socket["remoteAddress"], messageObject?.data)
       try {
         if (messageObject.event) this.msg.emit(messageObject.event, messageObject.data, socket)
@@ -95,7 +95,7 @@ export class WebSocketHTTPServer extends WebSocketServer {
    * - `skip` Socket to skip
    */
   send(event: string, data?: any, options: { to?: WebSocket; skip?: WebSocket } = {}) {
-    let message = JSON.stringify({ event, data })
+    const message = JSON.stringify({ event, data })
 
     try {
       if (options.to) options.to.send(message)

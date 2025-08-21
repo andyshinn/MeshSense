@@ -1,5 +1,6 @@
 <script lang="ts">
 import { fade, scale } from "svelte/transition"
+
 interface Props {
   visible?: boolean
   title?: string

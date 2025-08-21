@@ -29,7 +29,8 @@
     "rules": {
       "recommended": true,
       "suspicious": {
-        "noUnknownAtRules": "off"
+        "noUnknownAtRules": "off",
+        "noDoubleEquals": "off"
       }
     }
   },
@@ -43,7 +44,12 @@
     "enabled": true,
     "actions": {
       "source": {
-        "organizeImports": "on"
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [":ALIAS:", ":PACKAGE:", ":PATH:", "*.svelte"]
+          }
+        }
       }
     }
   }

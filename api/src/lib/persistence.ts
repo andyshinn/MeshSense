@@ -1,9 +1,9 @@
 import kfs from "key-file-storage"
-import { State } from "./state"
-import { dataDirectory } from "./paths"
 import { join } from "path"
+import { dataDirectory } from "./paths"
+import { State } from "./state"
 
-export let store = kfs(join(dataDirectory, "state"))
+export const store = kfs(join(dataDirectory, "state"))
 // store.version = 0.1
 
 /** Return key-values as a `Record` object */

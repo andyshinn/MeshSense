@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { NodeInfo } from "api/src/vars"
+
 interface Props {
   node: NodeInfo
 }

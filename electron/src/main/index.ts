@@ -1,8 +1,8 @@
-import { app, shell, BrowserWindow, ipcMain, utilityProcess } from "electron"
-import { spawn } from "child_process"
-import { join } from "path"
 import { electronApp, optimizer } from "@electron-toolkit/utils"
+import { spawn } from "child_process"
+import { app, BrowserWindow, ipcMain, shell, utilityProcess } from "electron"
 import { autoUpdater } from "electron-updater"
+import { join } from "path"
 import { buildMenu } from "./menu"
 import { getWindowState, saveWindowState } from "./window"
 
@@ -113,7 +113,7 @@ app.whenReady().then(async () => {
   console.log(`DIRNAME`, __dirname)
 
   console.log("[electron] Arguments", process.argv)
-  let headless = process.argv.includes("--headless")
+  const headless = process.argv.includes("--headless")
 
   if (!headless) {
     createWindow()
@@ -185,7 +185,7 @@ app.whenReady().then(async () => {
 
   // createWindow()
 
-  app.on("activate", function () {
+  app.on("activate", () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

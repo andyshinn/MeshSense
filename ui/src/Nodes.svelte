@@ -3,10 +3,10 @@ import {
   currentTime,
   myNodeMetadata,
   myNodeNum,
+  type NodeInfo,
   nodeInactiveTimer,
   nodes,
   pendingTraceroutes,
-  type NodeInfo,
 } from "api/src/vars"
 export let smallMode = writable(false)
 export let selectNodeFilterInput = writable(false)

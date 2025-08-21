@@ -1,14 +1,13 @@
 <script lang="ts">
-import { run } from "svelte/legacy"
-
-import { broadcastId, channels, myNodeNum, nodes, packets, version, type MeshPacket } from "api/src/vars"
-import Card from "./lib/Card.svelte"
-import { getNodeById, getNodeName, getNodeNameById, scrollToBottom, testPacket } from "./lib/util"
-import Modal from "./lib/Modal.svelte"
-import { messageDestination } from "./Message.svelte"
-import OpenLayersMap from "./lib/OpenLayersMap.svelte"
+import { broadcastId, channels, type MeshPacket, myNodeNum, nodes, packets, version } from "api/src/vars"
 import { tick } from "svelte"
+import { run } from "svelte/legacy"
+import Card from "./lib/Card.svelte"
+import Modal from "./lib/Modal.svelte"
+import type OpenLayersMap from "./lib/OpenLayersMap.svelte"
+import { getNodeById, getNodeName, getNodeNameById, scrollToBottom, testPacket } from "./lib/util"
 import { getSvgUri } from "./Map.svelte"
+import { messageDestination } from "./Message.svelte"
 import { highlightOwnNode } from "./Settings.svelte"
 
 function shouldPacketBeShown(packet: MeshPacket, includeTx, filterText: string) {

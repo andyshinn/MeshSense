@@ -65,8 +65,8 @@ export class State<T = any> {
   }
 
   static subscribe<T = any>(callback: ActionCallback<T>) {
-    this.allEvents.on("notify", callback)
-    return () => this.allEvents.removeListener("notify", callback)
+    State.allEvents.on("notify", callback)
+    return () => State.allEvents.removeListener("notify", callback)
   }
 
   on(action: string, callback: (...args: any[]) => void) {
@@ -122,7 +122,7 @@ export class State<T = any> {
     if (!Array.isArray(this.value)) {
       this.value = [] as any
     }
-    let match = (this.value as any[]).find(
+    const match = (this.value as any[]).find(
       (record: any) => record[primaryKey] == value[primaryKey] && record[primaryKey] != undefined,
     )
     if (match) Object.assign(match, value)
@@ -160,7 +160,7 @@ export class State<T = any> {
     if (!Array.isArray(this.value)) {
       this.value = [] as any
     }
-    let value = (this.value as []).shift()
+    const value = (this.value as []).shift()
     this.notify("shift")
     return value
   }

@@ -1,26 +1,24 @@
 <script lang="ts">
 import { Feature, Map, View } from "ol"
-import { OSM, Vector } from "ol/source"
-import TileLayer from "ol/layer/Tile"
-import Control from "ol/control/Control"
 import { defaults as defaultControls } from "ol/control"
-
+import Control from "ol/control/Control"
 import { LineString, Point, Polygon } from "ol/geom"
+import TileLayer from "ol/layer/Tile"
+import { OSM, Vector } from "ol/source"
 import { createEventDispatcher, onMount } from "svelte"
 import "ol/ol.css"
-import { fromLonLat, toLonLat } from "ol/proj"
+import { descending } from "ol/array"
+import type { Coordinate } from "ol/coordinate"
 import type Layer from "ol/layer/Layer"
 import VectorLayer from "ol/layer/Vector"
-import Style from "ol/style/Style"
-import Stroke from "ol/style/Stroke"
+import { fromLonLat, toLonLat, useGeographic } from "ol/proj"
+import type { LoadingStrategy } from "ol/source/Vector"
 import Circle from "ol/style/Circle"
 import Fill from "ol/style/Fill"
-import { useGeographic } from "ol/proj"
 import Icon from "ol/style/Icon"
-import { descending } from "ol/array"
+import Stroke from "ol/style/Stroke"
+import Style from "ol/style/Style"
 import Text from "ol/style/Text"
-import type { LoadingStrategy } from "ol/source/Vector"
-import type { Coordinate } from "ol/coordinate"
 
 useGeographic()
 let dispatch = createEventDispatcher()
@@ -272,7 +270,7 @@ onMount(() => {
     if (onClick) onClick(point[1], point[0])
   })
 
-  tile.on("prerender", function (e) {
+  tile.on("prerender", (e) => {
     if (darkMode) {
       const cx = e.context as CanvasRenderingContext2D
       cx.filter = "brightness(.6) invert(.9) contrast(2) hue-rotate(200deg) saturate(.8) brightness(.7)"

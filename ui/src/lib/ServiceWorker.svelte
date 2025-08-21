@@ -21,10 +21,10 @@ const registerServiceWorker = async () => {
   if (navigator.serviceWorker) {
     navigator.serviceWorker
       .register(`${import.meta.env.VITE_PATH || ""}/sw.js`)
-      .then(function (registration) {
+      .then((registration) => {
         console.log("Service worker registration successful:", registration)
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.warn("Service worker registration failed:", error)
       })
   }

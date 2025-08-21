@@ -1,8 +1,8 @@
-import { accessKey, apiHostname, broadcastId, lastFromRadio, nodes, packets, type NodeInfo } from "api/src/vars"
+import { accessKey, apiHostname, broadcastId, lastFromRadio, type NodeInfo, nodes, packets } from "api/src/vars"
+import axios from "axios"
 import { tick } from "svelte"
 import { derived, get, writable } from "svelte/store"
 import { enableAudioAlerts } from "../Settings.svelte"
-import axios from "axios"
 
 export let blockUserKey = writable(false)
 export const userKey = writable(localStorage.getItem("userKey") || "")

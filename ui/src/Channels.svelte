@@ -1,5 +1,6 @@
 <script lang="ts">
 import { channels } from "api/src/vars"
+
 let selectedChannelIndex = $state(0)
 let selectedChannel = $derived($channels?.[selectedChannelIndex])
 

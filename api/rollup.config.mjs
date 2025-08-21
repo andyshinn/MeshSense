@@ -1,12 +1,12 @@
-import typescript from "@rollup/plugin-typescript"
-import { nodeResolve } from "@rollup/plugin-node-resolve"
 import commonjs from "@rollup/plugin-commonjs"
 import json from "@rollup/plugin-json"
-import copy from "rollup-plugin-copy"
+import { nodeResolve } from "@rollup/plugin-node-resolve"
+import typescript from "@rollup/plugin-typescript"
 import { defineConfig } from "rollup"
-import { platform, arch } from "node:os"
-import { resolve } from "node:path"
+import copy from "rollup-plugin-copy"
 import { existsSync } from "node:fs"
+import { arch, platform } from "node:os"
+import { resolve } from "node:path"
 
 const externals = [
   "@mikro-orm/sqlite",

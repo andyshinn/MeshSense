@@ -1,10 +1,11 @@
 <script lang="ts">
 import { State } from "api/src/lib/state"
-import Card from "./lib/Card.svelte"
 import { address, connectionStatus } from "api/src/vars"
-import { smallMode } from "./Nodes.svelte"
 import axios from "axios"
+import Card from "./lib/Card.svelte"
 import { hasAccess } from "./lib/util"
+import { smallMode } from "./Nodes.svelte"
+
 interface Props {
   [key: string]: any
 }

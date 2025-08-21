@@ -1,9 +1,9 @@
+import electronToolkitPrettierConfig from "@electron-toolkit/eslint-config-prettier"
+import electronToolkitConfig from "@electron-toolkit/eslint-config-ts"
 import js from "@eslint/js"
+import { defineConfig, globalIgnores } from "eslint/config"
 import globals from "globals"
 import tseslint from "typescript-eslint"
-import electronToolkitConfig from "@electron-toolkit/eslint-config-ts"
-import electronToolkitPrettierConfig from "@electron-toolkit/eslint-config-prettier"
-import { defineConfig, globalIgnores } from "eslint/config"
 
 export default defineConfig([
   electronToolkitConfig,

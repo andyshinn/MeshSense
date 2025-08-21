@@ -1,7 +1,7 @@
 import { PluginBase } from "@electron-forge/plugin-base"
-import { ResolvedForgeConfig, ForgeMultiHookMap } from "@electron-forge/shared-types"
+import type { ForgeMultiHookMap, ResolvedForgeConfig } from "@electron-forge/shared-types"
+import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from "fs"
 import { join } from "path"
-import { copyFileSync, mkdirSync, existsSync, readdirSync, statSync } from "fs"
 
 export interface CopyNativeBindingsConfig {
   /**

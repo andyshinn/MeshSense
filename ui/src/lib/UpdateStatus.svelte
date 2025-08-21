@@ -1,11 +1,10 @@
 <script lang="ts">
-import { run } from "svelte/legacy"
-
-import axios from "axios"
-import { hasAccess } from "./util"
 import { State } from "api/src/lib/state"
 import { headless } from "api/src/vars"
+import axios from "axios"
 import { tick } from "svelte"
+import { run } from "svelte/legacy"
+import { hasAccess } from "./util"
 
 interface Props {
   updateStatus?: any

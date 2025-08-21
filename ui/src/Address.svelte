@@ -1,11 +1,11 @@
 <script lang="ts">
-import { run, preventDefault } from "svelte/legacy"
-
-import { connectionStatus, address, enableTLS, myNodeMetadata, myNodeNum, nodes, lastFromRadio } from "api/src/vars"
-import Card from "./lib/Card.svelte"
-import { smallMode } from "./Nodes.svelte"
-import { hasAccess } from "./lib/util"
+import { address, connectionStatus, enableTLS, lastFromRadio, myNodeMetadata, myNodeNum, nodes } from "api/src/vars"
 import axios from "axios"
+import { preventDefault, run } from "svelte/legacy"
+import Card from "./lib/Card.svelte"
+import { hasAccess } from "./lib/util"
+import { smallMode } from "./Nodes.svelte"
+
 interface Props {
   [key: string]: any
 }

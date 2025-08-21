@@ -2,6 +2,7 @@
 import { writable } from "svelte/store"
 export let expandedMap = writable(false)
 export let setPositionMode = writable(false)
+
 import { generateHexer } from "@bdancer/icon-gaga"
 
 export function getSvgUri(name: string) {

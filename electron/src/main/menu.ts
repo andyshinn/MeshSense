@@ -1,4 +1,4 @@
-import { app, Menu, BrowserWindow } from "electron"
+import { app, BrowserWindow, Menu } from "electron"
 import { autoUpdater } from "electron-updater"
 
 export function buildMenu() {
