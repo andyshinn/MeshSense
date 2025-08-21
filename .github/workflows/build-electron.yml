@@ -36,9 +36,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build all workspaces
-        run: npm run build
-
       - name: Set build arch
         id: set_arch
         shell: bash
