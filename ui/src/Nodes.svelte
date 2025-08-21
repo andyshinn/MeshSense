@@ -2,8 +2,6 @@
   import { currentTime, myNodeMetadata, myNodeNum, nodeInactiveTimer, nodes, pendingTraceroutes, type NodeInfo } from 'api/src/vars'
   export let smallMode = writable(false)
   export let selectNodeFilterInput = writable(false)
-  export let filteredNodes = writable<NodeInfo[]>([])
-  export let inactiveNodes = writable<NodeInfo[]>([])
   export let nodeVisibilityMode = writable<string>(localStorage.getItem('nodeVisibilityMode') ?? 'active')
   export let sortField = writable<string>(localStorage.getItem('sortField') ?? 'lastHeard')
   export let sortDirection = writable<'asc' | 'desc'>((localStorage.getItem('sortDirection') as 'asc' | 'desc') ?? 'desc')
@@ -19,7 +17,6 @@
 
 <script lang="ts">
   import { run } from 'svelte/legacy';
-  import { untrack } from 'svelte';
 
   import Card from './lib/Card.svelte'
   import { formatTemp, getCoordinates, getNodeName, getNodeNameById, hasAccess, displayFahrenheit, unixSecondsTimeAgo } from './lib/util'
@@ -47,19 +44,69 @@
 
 
 
-  function filterNodes() {
-    $inactiveNodes = $nodes.filter(isInactive)
 
-    $filteredNodes = $nodes
+  function clearNodes() {
+    axios.post('/deleteNodes', { nodes: inactiveNodes })
+  }
+
+  // Function to handle node visibility toggle
+  function toggleNodeVisibility() {
+    switch ($nodeVisibilityMode) {
+      case 'active':
+        $nodeVisibilityMode = 'inactive'
+        break
+      case 'inactive':
+        $nodeVisibilityMode = 'all'
+        break
+      case 'all':
+      default:
+        $nodeVisibilityMode = 'active'
+        break
+    }
+  }
+
+  function getBatteryColor(batteryLevel) {
+    if (batteryLevel === 101) return '' // use HTML style="background-color: 'steelblue'"
+    if (batteryLevel >= 70) return 'bg-green-500'
+    if (batteryLevel >= 50) return 'bg-[#9acd32]'
+    if (batteryLevel >= 25) return 'bg-yellow-500'
+    if (batteryLevel >= 10) return 'bg-orange-500'
+    if (batteryLevel >= 6) return 'bg-red-500'
+    return 'bg-[red]'
+  }
+
+  function toggleSortDirection() {
+    $sortDirection = $sortDirection === 'asc' ? 'desc' : 'asc'
+  }
+  run(() => {
+    if ($selectNodeFilterInput) {
+      nodeFilterInput.select()
+      selectNodeFilterInput.set(false)
+    }
+  });
+  run(() => {
+    localStorage.setItem('nodeVisibilityMode', $nodeVisibilityMode)
+  });
+  run(() => {
+    localStorage.setItem('includeMqtt', String(includeMqtt))
+  });
+  run(() => {
+    localStorage.setItem('sortField', $sortField)
+  });
+  run(() => {
+    localStorage.setItem('sortDirection', $sortDirection)
+  });
+  function filterNodes(nodes: NodeInfo[], inactiveNodes: NodeInfo[]) {
+    return nodes
       .filter((node) => {
         switch ($nodeVisibilityMode) {
           case 'inactive':
-            return $inactiveNodes.some((inactive) => node.num === inactive.num)
+            return inactiveNodes.some((inactive) => node.num === inactive.num)
           case 'all':
             return true
           case 'active':
           default:
-            return node.num === $myNodeNum || !$inactiveNodes.some((inactive) => node.num === inactive.num)
+            return node.num === $myNodeNum || !inactiveNodes.some((inactive) => node.num === inactive.num)
         }
       })
       .filter((node) => includeMqtt || !node.viaMqtt)
@@ -151,60 +198,11 @@
       })
   }
 
-  function clearNodes() {
-    axios.post('/deleteNodes', { nodes: $inactiveNodes })
-  }
-
-  // Function to handle node visibility toggle
-  function toggleNodeVisibility() {
-    switch ($nodeVisibilityMode) {
-      case 'active':
-        $nodeVisibilityMode = 'inactive'
-        break
-      case 'inactive':
-        $nodeVisibilityMode = 'all'
-        break
-      case 'all':
-      default:
-        $nodeVisibilityMode = 'active'
-        break
-    }
-  }
-
-  function getBatteryColor(batteryLevel) {
-    if (batteryLevel === 101) return '' // use HTML style="background-color: 'steelblue'"
-    if (batteryLevel >= 70) return 'bg-green-500'
-    if (batteryLevel >= 50) return 'bg-[#9acd32]'
-    if (batteryLevel >= 25) return 'bg-yellow-500'
-    if (batteryLevel >= 10) return 'bg-orange-500'
-    if (batteryLevel >= 6) return 'bg-red-500'
-    return 'bg-[red]'
-  }
-
-  function toggleSortDirection() {
-    $sortDirection = $sortDirection === 'asc' ? 'desc' : 'asc'
-  }
-  run(() => {
-    if ($selectNodeFilterInput) {
-      nodeFilterInput.select()
-      selectNodeFilterInput.set(false)
-    }
-  });
-  run(() => {
-    localStorage.setItem('nodeVisibilityMode', $nodeVisibilityMode)
-  });
-  run(() => {
-    localStorage.setItem('includeMqtt', String(includeMqtt))
-  });
-  run(() => {
-    localStorage.setItem('sortField', $sortField)
-  });
-  run(() => {
-    localStorage.setItem('sortDirection', $sortDirection)
-  });
-  run(() => {
-    $nodes.length, $nodeInactiveTimer, $nodeVisibilityMode, includeMqtt, $filterText, $sortField, $sortDirection;
-    untrack(() => filterNodes());
+  // Convert to proper derived values without side effects
+  let inactiveNodes = $derived($nodes.filter(isInactive));
+  
+  let filteredNodes = $derived.by(() => {
+    return filterNodes($nodes, inactiveNodes)
   });
 </script>
 
@@ -251,7 +249,7 @@
               'btn'
             }"
           >
-            {$filteredNodes.length}
+            {filteredNodes.length}
           </button>
           <select bind:value={$sortField} class="btn text-xs font-normal w-20">
             <option value="lastHeard">Last Heard</option>
@@ -285,7 +283,7 @@
     </div>
   {/if}
     <div class="p-1 text-sm grid gap-1 overflow-auto h-full content-start">
-      {#each $filteredNodes as node (node.num)}
+      {#each filteredNodes as node (node.num)}
         <div
           class:ring-1={node.hopsAway == 0}
           class="ring-blue-500/30 bg-blue-300/10 rounded px-1 py-0.5 flex flex-col gap-0.5 {node.num == $myNodeNum
@@ -480,8 +478,8 @@
           {/if}
         </div>
       {/each}
-      {#if $hasAccess && $nodeVisibilityMode !== 'active' && $inactiveNodes.length >= 10}
-        <button onclick={clearNodes} class="btn h-12">Clear {$inactiveNodes?.length} Inactive Nodes</button>
+      {#if $hasAccess && $nodeVisibilityMode !== 'active' && inactiveNodes.length >= 10}
+        <button onclick={clearNodes} class="btn h-12">Clear {inactiveNodes?.length} Inactive Nodes</button>
       {/if}
     </div>
   </div>

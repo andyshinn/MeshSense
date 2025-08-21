@@ -25,11 +25,13 @@ intercept(
     lastLogStream.write(text)
     consoleLog.push(text)
     while (consoleLog.length >= logSize) consoleLog.shift()
+    return text
   },
   (err) => {
-    if (err.includes('Possible EventTarget memory leak detected')) return
+    if (typeof err === 'string' && err.includes('Possible EventTarget memory leak detected')) return err
     consoleLog.push(err)
     while (consoleLog.length >= logSize) consoleLog.shift()
+    return err
   }
 )
 

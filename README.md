@@ -46,16 +46,16 @@ git clone --recurse-submodules https://github.com/Affirmatech/MeshSense.git
 cd MeshSense
 ```
 
-The `pnpm` tool will install the dependencies for `ui`, `api`, and `electron` directories.
+The `npm` tool will install the dependencies for `ui`, `api`, and `electron` directories.
 
 ```sh
-pnpm install
+npm install
 ```
 
 During development, the electron portion is usually not needed. ou can start the UI and API services using:
 
 ```sh
-pnpm run dev
+npm run dev
 ```
 
 The front-end should now be accessible by connecting to the **API** service in a browser. Be careful not to connect to the UI service by accident. The correct URL (API URL) is http://localhost:5920/
@@ -64,4 +64,4 @@ Any API changes will automatically reload the service. Any UI changes will be ho
 
 **Please note:** currently certain event subscribers (particularly State variables) will duplicate their subscription when Vite hot-reloads resulting in duplicate events such as Log entries. Until this is fixed, the easiest solution is to refresh the browser to reset the events.
 
-To build the `ui`, `api`, and `electron` components, the `pnpm run build` script will accomplish this. The official electron builds are signed with an Affirmatech certificate on our build servers. The deployables will be placed in `api/dist` and `electron/dist`.
+To build the `ui`, `api`, and `electron` components, the `npm run build` script will accomplish this. The official electron builds are signed with an Affirmatech certificate on our build servers. The deployables will be placed in `api/dist` and `electron/dist`.

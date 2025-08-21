@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@meshtastic/*": [
+        "./node_modules/@meshtastic/*/dist/mod.mjs",
+        "./node_modules/@meshtastic/*/dist/mod.js"
+      ]
+    },
+  }
+}

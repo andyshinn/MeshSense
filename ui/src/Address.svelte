@@ -30,9 +30,21 @@
   }
 
   let spinnerAngle = $state(0)
+  let animationInterval: number | undefined
 
   run(() => {
-    if ($lastFromRadio && $connectionStatus == 'configuring') spinnerAngle = (spinnerAngle + 8) % 360
+    // Clear any existing interval
+    if (animationInterval) {
+      clearInterval(animationInterval)
+      animationInterval = undefined
+    }
+    
+    // Start animation if configuring
+    if ($lastFromRadio && $connectionStatus == 'configuring') {
+      animationInterval = setInterval(() => {
+        spinnerAngle = (spinnerAngle + 8) % 360
+      }, 50) // Update every 50ms for smooth animation
+    }
   });
 </script>
 
