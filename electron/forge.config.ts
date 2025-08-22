@@ -24,15 +24,29 @@ const winSigningOptions = {
 
 const enableWinSigning = process.env.ENABLE_WIN_SIGNING === "true"
 
+function getIconPath() {
+  if (process.platform === "darwin") {
+    return "build/meshsense-regular-adaptive.icns"
+  } else if (process.platform === "win32") {
+    return "build/icon.ico"
+  } else {
+    return "build/icon.png"
+  }
+}
+
 const config: ForgeConfig = {
   packagerConfig: {
     name: "MeshSense",
-    executableName: "meshsense",
     asar: true,
     appBundleId: "com.affirmatech.meshsense",
-    icon: process.platform === "darwin" ? "build/meshsense-regular-adaptive" : "build/icon",
+    icon: getIconPath(),
     extraResource: ["resources/api"],
-    osxSign: process.platform === "darwin" ? {} : undefined,
+    osxSign: {},
+    osxNotarize: {
+      appleApiKey: process.env.APPLE_API_KEY,
+      appleApiKeyId: process.env.APPLE_API_KEY_ID,
+      appleApiIssuer: process.env.APPLE_API_ISSUER
+    },
     osxUniversal: {
       mergeASARs: true,
       singleArchFiles: "Contents/Resources/app/node_modules/**/*.node",
@@ -54,7 +68,7 @@ const config: ForgeConfig = {
     new MakerZIP({}, ["darwin"]),
     new MakerDMG(
       {
-        icon: "build/meshsense-regular-adaptive.icns",
+        icon: "build/meshsense-regular-adaptive.icns"
       },
       ["darwin"],
     ),
