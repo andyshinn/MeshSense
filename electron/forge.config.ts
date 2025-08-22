@@ -22,7 +22,16 @@ const winSigningOptions = {
   certificateSubjectName: "Affirmatech Incorporated",
 }
 
-const enableWinSigning = process.env.ENABLE_WIN_SIGNING === "true"
+const enableWinSigning = !!(
+  process.env.ENABLE_WIN_SIGNING &&
+  process.env.ENABLE_WIN_SIGNING.toLowerCase() === "true"
+)
+
+const hasNotarizeEnvVars = !!(
+  process.env.APPLE_API_KEY &&
+  process.env.APPLE_API_KEY_ID &&
+  process.env.APPLE_API_ISSUER
+)
 
 function getIconPath() {
   if (process.platform === "darwin") {
@@ -42,11 +51,13 @@ const config: ForgeConfig = {
     icon: getIconPath(),
     extraResource: ["resources/api"],
     osxSign: {},
-    osxNotarize: {
-      appleApiKey: process.env.APPLE_API_KEY,
-      appleApiKeyId: process.env.APPLE_API_KEY_ID,
-      appleApiIssuer: process.env.APPLE_API_ISSUER
-    },
+    ...(hasNotarizeEnvVars && {
+      osxNotarize: {
+        appleApiKey: process.env.APPLE_API_KEY,
+        appleApiKeyId: process.env.APPLE_API_KEY_ID,
+        appleApiIssuer: process.env.APPLE_API_ISSUER,
+      },
+    }),
     osxUniversal: {
       mergeASARs: true,
       singleArchFiles: "Contents/Resources/app/node_modules/**/*.node",
@@ -68,7 +79,7 @@ const config: ForgeConfig = {
     new MakerZIP({}, ["darwin"]),
     new MakerDMG(
       {
-        icon: "build/meshsense-regular-adaptive.icns"
+        icon: "build/meshsense-regular-adaptive.icns",
       },
       ["darwin"],
     ),
