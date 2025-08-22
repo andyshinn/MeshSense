@@ -206,8 +206,13 @@ export function focusNodeFilter() {
       })
   }
 
+  // Reactive version of isInactive that uses $currentTime
+  function isNodeInactiveReactive(node: NodeInfo) {
+    return $currentTime - node.lastHeard * 1000 >= ($nodeInactiveTimer ?? 60) * 60 * 1000
+  }
+
   // Convert to proper derived values without side effects
-  let inactiveNodes = $derived($nodes.filter(isInactive));
+  let inactiveNodes = $derived($nodes.filter(isNodeInactiveReactive));
   
   let filteredNodes = $derived.by(() => {
     return filterNodes($nodes, inactiveNodes)
@@ -294,11 +299,8 @@ export function focusNodeFilter() {
       {#each filteredNodes as node (node.num)}
         <div
           class:ring-1={node.hopsAway == 0}
-          class="ring-blue-500/30 bg-blue-300/10 rounded px-1 py-0.5 flex flex-col gap-0.5 {node.num == $myNodeNum
-            ? 'bg-linear-to-r '
-            : Date.now() - node.lastHeard * 1000 < ($nodeInactiveTimer ?? 60) * 60 * 1000
-              ? ''
-              : 'grayscale'}  "
+          class:grayscale={node.num != $myNodeNum && isNodeInactiveReactive(node)}
+          class="ring-blue-500/30 bg-blue-300/10 rounded px-1 py-0.5 flex flex-col gap-0.5 {node.num == $myNodeNum ? 'bg-linear-to-r' : ''}"
         >
           {#if $smallMode}
             <!-- Short Mode -->
