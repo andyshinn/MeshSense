@@ -22,16 +22,8 @@ const winSigningOptions = {
   certificateSubjectName: "Affirmatech Incorporated",
 }
 
-const enableWinSigning = !!(
-  process.env.ENABLE_WIN_SIGNING &&
-  process.env.ENABLE_WIN_SIGNING.toLowerCase() === "true"
-)
-
-const hasNotarizeEnvVars = !!(
-  process.env.APPLE_API_KEY &&
-  process.env.APPLE_API_KEY_ID &&
-  process.env.APPLE_API_ISSUER
-)
+const enableWinSigning = !!(process.env.ENABLE_WIN_SIGNING && process.env.ENABLE_WIN_SIGNING.toLowerCase() === "true")
+const hasNotarizeEnvVars = !!(process.env.APPLE_API_KEY && process.env.APPLE_API_KEY_ID && process.env.APPLE_API_ISSUER)
 
 function getIconPath() {
   if (process.platform === "darwin") {
