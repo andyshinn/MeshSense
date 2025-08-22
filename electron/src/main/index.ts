@@ -44,7 +44,9 @@ function createWindow(): void {
     height: windowState.height,
     show: false,
     autoHideMenuBar: true,
+    titleBarStyle: "hidden",
     ...(process.platform === "linux" ? { icon: join(process.resourcesPath, "icon.png") } : {}),
+    ...(process.platform !== "darwin" ? { titleBarOverlay: true } : {}),
     webPreferences: {
       preload: join(__dirname, "./preload/index.js"),
       sandbox: false,

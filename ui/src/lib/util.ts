@@ -8,6 +8,7 @@ import { enableAudioAlerts } from "../Settings.svelte"
 const logger = createLogger("util")
 
 export let blockUserKey = writable(false)
+export const isElectron = window?.api != null
 export const userKey = writable(localStorage.getItem("userKey") || "")
 
 export const hasAccess = derived(
