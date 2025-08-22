@@ -8,7 +8,7 @@ import type OpenLayersMap from "./lib/OpenLayersMap.svelte"
 import { getNodeById, getNodeName, getNodeNameById, scrollToBottom, testPacket } from "./lib/util"
 import { getSvgUri } from "./Map.svelte"
 import { messageDestination } from "./Message.svelte"
-import { highlightOwnNode } from "./Settings.svelte"
+import { highlightOwnNode } from "./components/settings/Settings.svelte"
 
 function shouldPacketBeShown(packet: MeshPacket, includeTx, filterText: string) {
   if (filterText) {

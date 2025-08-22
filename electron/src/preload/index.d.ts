@@ -15,6 +15,7 @@ declare global {
     api: {
       onOpenSettings: (callback: () => void) => void
       onFocusNodeFilter: (callback: () => void) => void
+      openSettingsWindow: () => void
     }
   }
 }

@@ -3,7 +3,7 @@ import { AnsiUp } from "ansi_up"
 import axios from "axios"
 import { onDestroy, onMount, tick } from "svelte"
 import { run } from "svelte/legacy"
-import { scrollToBottom, userKey } from "./lib/util"
+import { scrollToBottom, userKey } from "../../lib/util"
 
 let ansi = new AnsiUp()
 

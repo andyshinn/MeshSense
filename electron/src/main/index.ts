@@ -22,6 +22,7 @@ process.on("uncaughtException", (error: any) => {
 let apiProcess: Electron.UtilityProcess | any
 let apiPort: any = 9999
 let mainWindow: BrowserWindow
+let settingsWindow: BrowserWindow | null = null
 
 /** asnyc needed for updateCheckLoop to allow electron to launch main window */
 async function updateCheckLoop() {
@@ -84,6 +85,42 @@ function createWindow(): void {
 
   // This is a simple splash screen with our loading message
   mainWindow.loadFile(join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`))
+}
+
+function createSettingsWindow(): void {
+  if (settingsWindow) {
+    settingsWindow.focus()
+    return
+  }
+
+  settingsWindow = new BrowserWindow({
+    width: 1100,
+    height: 600,
+    parent: mainWindow,
+    title: `${app.getName()} Settings`,
+    modal: true,
+    show: false,
+    autoHideMenuBar: true,
+    webPreferences: {
+      preload: join(__dirname, "./preload/index.js"),
+      sandbox: false,
+    },
+  })
+
+  settingsWindow.on("ready-to-show", () => {
+    settingsWindow?.show()
+  })
+
+  settingsWindow.on("closed", () => {
+    settingsWindow = null
+  })
+
+  // Load the settings page route
+  if (process.env.DEV_API_URL) {
+    settingsWindow.loadURL(`${process.env.DEV_API_URL}/settings`)
+  } else {
+    settingsWindow.loadURL(`http://localhost:${apiPort}/settings`)
+  }
 }
 
 function startApiServer() {
@@ -178,6 +215,11 @@ app.whenReady().then(async () => {
 
   // IPC test
   ipcMain.on("ping", () => logger.info("pong"))
+
+  // IPC handler to open settings window
+  ipcMain.on("open-settings-window", () => {
+    createSettingsWindow()
+  })
 
   // createWindow()
 

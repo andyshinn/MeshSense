@@ -14,6 +14,7 @@ import Message from "./Message.svelte"
 import News, { newsVisible } from "./News.svelte"
 import Nodes, { focusNodeFilter, smallMode } from "./Nodes.svelte"
 import SettingsModal from "./SettingsModal.svelte"
+import SettingsMain from "./components/SettingsMain.svelte"
 
 export const ws = new WebSocketClient(`${import.meta.env.VITE_PATH || ""}/ws`)
 axios.defaults.baseURL = import.meta.env.VITE_PATH
@@ -24,11 +25,31 @@ axios.defaults.baseURL = import.meta.env.VITE_PATH
 
   import { onMount } from 'svelte'
   import { showPage } from './SettingsModal.svelte'
+  import { showConfigModal, modalPage } from './components/SettingsMain.svelte'
+
+  // Simple routing detection
+  const currentPath = window.location.pathname
+  const isSettingsPage = currentPath === '/settings'
+
+  // Initialize settings page if we're on /settings route
+  if (isSettingsPage) {
+    showConfigModal.set(true)
+    modalPage.set("Settings")
+  }
+
+  function openSettings() {
+    // Check if we're in Electron and use native window, otherwise fall back to modal
+    if (window.api?.openSettingsWindow) {
+      window.api.openSettingsWindow()
+    } else {
+      showPage('Settings')
+    }
+  }
 
   onMount(() => {
     if (window.api?.onOpenSettings) {
       window.api.onOpenSettings(() => {
-        showPage('Settings')
+        openSettings()
       })
     }
 
@@ -42,9 +63,13 @@ axios.defaults.baseURL = import.meta.env.VITE_PATH
 
 <!-- <ServiceWorker /> -->
 <UpdateStatus />
-<SettingsModal />
 
-<main class="w-full grid grid-cols-[auto_1fr] gap-2 p-2 overflow-auto h-full">
+{#if isSettingsPage}
+  <SettingsMain />
+{:else}
+  <SettingsModal />
+
+  <main class="w-full grid grid-cols-[auto_1fr] gap-2 p-2 overflow-auto h-full">
   <News />
   <div class="flex flex-col gap-2 content-start h-full overflow-auto">
     {#if $hasAccess}
@@ -79,7 +104,7 @@ axios.defaults.baseURL = import.meta.env.VITE_PATH
         <div class="font-normal absolute m-2 top-0 right-0 flex gap-2 items-center">
           <div class="text-xs text-white/50 pr-2 font-bold">MeshSense {$version}</div>
           <button class="btn btn-sm h-6 grid place-content-center" onclick={() => newsVisible.set(true)}>📰</button>
-          <button class="btn btn-sm h-6 grid place-content-center" onclick={() => showPage('Settings')}>⚙</button>
+          <button class="btn btn-sm h-6 grid place-content-center" onclick={() => openSettings()}>⚙</button>
         </div>
       </div>
     {/if}
@@ -88,6 +113,7 @@ axios.defaults.baseURL = import.meta.env.VITE_PATH
     {/if}
   </div>
 </main>
+{/if}
 
 <style>
   @media (min-width: 2000px) {

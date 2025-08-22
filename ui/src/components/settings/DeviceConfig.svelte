@@ -1,7 +1,7 @@
 <script lang="ts">
 import axios from "axios"
 import { onDestroy, onMount } from "svelte"
-import { userKey } from "./lib/util"
+import { userKey } from "../../lib/util"
 
 let deviceConfig = $state({})
 let keys = $state([])

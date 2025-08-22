@@ -29,7 +29,7 @@ enableAudioAlerts.subscribe((v) => {
     myNodeNum,
     meshMapForwarding
   } from 'api/src/vars'
-  import { hasAccess, userKey, blockUserKey, getNodeById, displayFahrenheit } from './lib/util'
+  import { hasAccess, userKey, blockUserKey, getNodeById, displayFahrenheit } from '../../lib/util'
   import { State } from 'api/src/lib/state'
   import { tick } from 'svelte'
   import axios from 'axios'
@@ -75,7 +75,7 @@ enableAudioAlerts.subscribe((v) => {
       </label>
     </div>
 
-    <!-- 
+    <!--
     <hr class="opacity-25" />
 
     <form on:change={positionChange} class="grid gap-2 max-w-xs md:max-w-none md:grid-cols-2">

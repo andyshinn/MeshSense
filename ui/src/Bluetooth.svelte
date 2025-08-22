@@ -26,7 +26,7 @@ let bluetoothDeviceList = new State<{ id: string; name: string }[]>("bluetoothDe
       {#each $bluetoothDeviceList as { id, name }}
         <button
           class="btn"
-          class:hidden={name.startsWith('Unknown or Unsupported Device')}
+          class:hidden={name?.startsWith('Unknown or Unsupported Device')}
           onclick={() => {
             $address = id
             axios.post('/connect', { address: id })

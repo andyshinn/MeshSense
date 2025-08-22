@@ -11,10 +11,22 @@ interface Props {
 
 let { visible = $bindable(false), title = "", fillHeight = false, children, ...rest }: Props = $props()
 
+// Determine if we're running in Electron with native modal support
+const isElectronWithNativeModal = typeof window !== 'undefined' && window.api?.openSettingsWindow
+
 function handleKeydown(e: KeyboardEvent) {
   if (visible && e.code == "Escape") {
-    visible = false
+    handleClose()
     e.stopPropagation()
+  }
+}
+
+function handleClose() {
+  visible = false
+  
+  // If we're in Electron and using native modals, close the BrowserWindow
+  if (isElectronWithNativeModal && window.api?.closeSettingsWindow) {
+    window.api.closeSettingsWindow()
   }
 }
 </script>
@@ -22,13 +34,17 @@ function handleKeydown(e: KeyboardEvent) {
 <svelte:window onkeydowncapture={handleKeydown} />
 
 {#if visible}
-  <button transition:fade={{ duration: 150 }} class="bg-black/30 fixed top-0 left-0 w-full h-full z-20" aria-label="Close modal" onclick={() => (visible = false)}> </button>
+  <!-- Only show overlay and transitions for div modals, not native BrowserWindow modals -->
+  {#if !isElectronWithNativeModal}
+    <button transition:fade={{ duration: 150 }} class="bg-black/30 fixed top-0 left-0 w-full h-full z-20" aria-label="Close modal" onclick={() => handleClose()}> </button>
+  {/if}
+  
   <div
-    transition:scale={{ duration: 500, start: 0.8 }}
+    transition:scale={{ duration: isElectronWithNativeModal ? 0 : 500, start: 0.8 }}
     id="popover-default"
     role="tooltip"
     class:h-full={fillHeight}
-    class="{rest.class || ''} fixed z-20 w-[80%] left-[10%] top-[10%] max-h-[80%] flex flex-col
+    class="{rest.class || ''} {isElectronWithNativeModal ? 'h-full w-full' : 'fixed z-20 w-[80%] left-[10%] top-[10%] max-h-[80%]'} flex flex-col
     text-sm transition-opacity duration-300 border rounded-lg shadow-sm text-gray-400 border-gray-600 bg-gray-800"
   >
     <div class="px-3 py-2 border-b rounded-t-lg border-gray-600 bg-gray-700">
@@ -38,7 +54,7 @@ function handleKeydown(e: KeyboardEvent) {
             {title}
           </div>
 
-          <button onclick={() => (visible = false)} class="rounded-full bg-black/20 w-7 text-center text-sm opacity-90">X</button>
+          <button onclick={() => handleClose()} class="rounded-full bg-black/20 w-7 text-center text-sm opacity-90">X</button>
         </h3>
       {/if}
     </div>
@@ -47,6 +63,6 @@ function handleKeydown(e: KeyboardEvent) {
         <p>And here's some amazing content. It's very engaging. Right?</p>
       {/if}
     </div>
-    <button class="btn btn-sm block ml-auto m-3 btn-primary" onclick={() => (visible = false)}>Close</button>
+    <button class="btn btn-sm block ml-auto m-3 btn-primary" onclick={() => handleClose()}>Close</button>
   </div>
 {/if}

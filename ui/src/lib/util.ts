@@ -3,7 +3,7 @@ import { accessKey, apiHostname, broadcastId, lastFromRadio, type NodeInfo, node
 import axios from "axios"
 import { tick } from "svelte"
 import { derived, get, writable } from "svelte/store"
-import { enableAudioAlerts } from "../Settings.svelte"
+import { enableAudioAlerts } from "../components/settings/Settings.svelte"
 
 const logger = createLogger("util")
 

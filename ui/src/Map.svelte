@@ -39,6 +39,15 @@ export function getIconURL(node: NodeInfo) {
   import OpenLayersMap from './lib/OpenLayersMap.svelte'
   import { getCoordinates, getNodeById, getNodeName, getNodeNameById, setPosition } from './lib/util'
   import { showConfigModal, showPage } from './SettingsModal.svelte'
+
+  function openSettings() {
+    // Check if we're in Electron and use native window, otherwise fall back to modal
+    if (window.api?.openSettingsWindow) {
+      window.api.openSettingsWindow()
+    } else {
+      showPage('Settings')
+    }
+  }
   import { newsVisible } from './News.svelte'
 
   interface Props {
@@ -117,7 +126,7 @@ export function getIconURL(node: NodeInfo) {
     >
     <button title="What's New?" class="btn btn-sm h-6 grid place-content-center" onclick={() => newsVisible.set(true)}>📰</button>
     <a title="MeshSense Global Map" target="_blank" rel="noopener" class="font-bold btn text-sm hover:brightness-110" href="https://meshsense.affirmatech.com/">🌎</a>
-    <button title="Settings" class="btn btn-sm h-6 font-normal grid place-content-center" onclick={() => showPage('Settings')}>⚙</button>
+    <button title="Settings" class="btn btn-sm h-6 font-normal grid place-content-center" onclick={() => openSettings()}>⚙</button>
   </h2>
   <OpenLayersMap
     bind:this={ol}

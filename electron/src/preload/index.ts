@@ -22,6 +22,9 @@ const api = {
   onFocusNodeFilter: (callback: () => void) => {
     ipcRenderer.on("focus-node-filter", callback)
   },
+  openSettingsWindow: () => {
+    ipcRenderer.send("open-settings-window")
+  },
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
