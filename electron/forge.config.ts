@@ -45,7 +45,7 @@ const config: ForgeConfig = {
     osxNotarize: {
       appleApiKey: process.env.APPLE_API_KEY,
       appleApiKeyId: process.env.APPLE_API_KEY_ID,
-      appleApiIssuer: process.env.APPLE_API_ISSUER
+      appleApiIssuer: process.env.APPLE_API_ISSUER,
     },
     osxUniversal: {
       mergeASARs: true,
@@ -68,7 +68,7 @@ const config: ForgeConfig = {
     new MakerZIP({}, ["darwin"]),
     new MakerDMG(
       {
-        icon: "build/meshsense-regular-adaptive.icns"
+        icon: "build/meshsense-regular-adaptive.icns",
       },
       ["darwin"],
     ),
