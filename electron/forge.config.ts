@@ -38,6 +38,7 @@ function getIconPath() {
 const config: ForgeConfig = {
   packagerConfig: {
     name: "MeshSense",
+    executableName: "meshsense",
     asar: true,
     appBundleId: "com.affirmatech.meshsense",
     icon: getIconPath(),
