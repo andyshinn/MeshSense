@@ -2,12 +2,35 @@
 import { entries, get, set } from "idb-keyval"
 export let updateChannel = new State("updateChannel", undefined)
 export let enableAudioAlerts = writable()
+export let enableNotifications = writable()
+export let notificationsSilent = writable()
 export let highlightOwnNode = writable((localStorage.getItem("highlightOwnNode") ?? "true") == "true")
 highlightOwnNode.subscribe((value) => localStorage.setItem("highlightOwnNode", String(value)))
 get("enableAudioAlerts").then((v) => enableAudioAlerts.set(v ?? true))
 enableAudioAlerts.subscribe((v) => {
   set("enableAudioAlerts", v)
 })
+get("enableNotifications").then((v) => enableNotifications.set(v ?? false))
+enableNotifications.subscribe((v) => {
+  set("enableNotifications", v)
+  updateElectronNotificationSettings()
+})
+get("notificationsSilent").then((v) => notificationsSilent.set(v ?? false))
+notificationsSilent.subscribe((v) => {
+  set("notificationsSilent", v)
+  updateElectronNotificationSettings()
+})
+
+function updateElectronNotificationSettings() {
+  if (typeof window !== "undefined" && window.electron) {
+    Promise.all([get("enableNotifications"), get("notificationsSilent")]).then(([enabled, silent]) => {
+      window.electron.ipcRenderer.invoke("notification-settings-update", {
+        enabled: enabled ?? false,
+        silent: silent ?? false,
+      })
+    })
+  }
+}
 </script>
 
 <script>
@@ -57,6 +80,18 @@ enableAudioAlerts.subscribe((v) => {
     <input type="checkbox" bind:checked={$enableAudioAlerts} />
     <div class="font-bold">Enable Audio Alerts</div>
   </label>
+  
+  <label class="flex gap-2">
+    <input type="checkbox" bind:checked={$enableNotifications} />
+    <div class="font-bold">Enable Desktop Notifications for incoming messages</div>
+  </label>
+  
+  {#if $enableNotifications}
+    <label class="flex gap-2 ml-6">
+      <input type="checkbox" bind:checked={$notificationsSilent} />
+      <div class="font-bold">Silent notifications (no sound)</div>
+    </label>
+  {/if}
   {#if $hasAccess}
     <div class="flex flex-wrap gap-3">
       <label>

@@ -4,6 +4,7 @@ import { contextBridge, ipcRenderer } from "electron"
 const electronAPI = {
   ipcRenderer: {
     send: (channel: string, ...args: unknown[]) => ipcRenderer.send(channel, ...args),
+    invoke: (channel: string, ...args: unknown[]) => ipcRenderer.invoke(channel, ...args), // returns Promise for two-way communication
   },
   process: {
     versions: process.versions,

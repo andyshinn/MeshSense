@@ -6,6 +6,7 @@ import type { IncomingMessage, Server, ServerResponse } from "http"
 // import pem from 'pem'
 // import { store } from './persistence'
 import { createProxyMiddleware } from "http-proxy-middleware"
+import { send } from "../meshtastic"
 import { createNodeLogger } from "./logging"
 import { staticDirectory } from "./paths"
 import { State } from "./state"
@@ -107,16 +108,39 @@ async function initSever() {
 
   parentPort?.on("message", (e: any) => {
     logger.debug("Received from Electron: ", e)
-    if (e.data.event == "version") {
-      version.set(e.data.body)
-    } else if (e.data.event == "headless") {
-      headless.set(e.data.body)
-    } else if (e.data.event == "updateChannel") {
+    // Handle direct messages from electron (version, headless, send-message)
+    if (e.event == "version") {
+      version.set(e.body)
+    } else if (e.event == "headless") {
+      headless.set(e.body)
+    } else if (e.event == "updateChannel") {
+      if (e.body) updateChannel.set(e.body)
+    } else if (e.event == "send-message") {
+      // Handle notification reply messages
+      logger.info("[notifications] Received send-message event from electron")
+      const { message, to, channel, isDirect } = e.body
+      logger.debug("[notifications] Reply message data:", { message, to, channel, isDirect })
+      send({
+        message,
+        destination: isDirect ? to : undefined,
+        channel: isDirect ? undefined : channel,
+      })
+        .then(() => {
+          logger.info(
+            `[notifications] Successfully sent reply: "${message}" to ${isDirect ? "node" : "channel"} ${to || channel}`,
+          )
+        })
+        .catch((error) => {
+          logger.error("Failed to send notification reply:", error)
+        })
+    }
+    // Handle messages with nested data structure (updater events)
+    else if (e.data?.event == "updateChannel") {
       if (e.data.body) updateChannel.set(e.data.body)
-    } else if (["update-available", "download-progress", "update-downloaded"].includes(e.data.event)) {
+    } else if (["update-available", "download-progress", "update-downloaded"].includes(e.data?.event)) {
       updateStatus.set(e.data)
     }
-    // wss?.send(e.data.event, e.data.body)
+    // wss?.send(e.event || e.data?.event, e.body || e.data?.body)
   })
 
   updateChannel.subscribe((v) => {

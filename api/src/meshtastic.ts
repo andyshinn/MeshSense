@@ -69,6 +69,17 @@ function uploadMyNode() {
   sendToMeshMap(node, node)
 }
 
+function sendToElectron(event: string, body: any) {
+  logger.info(`[notifications] sendToElectron called with event: ${event}`)
+  const parentPort = process["parentPort"]
+  if (parentPort) {
+    logger.debug(`[notifications] Sending message to electron process`)
+    parentPort.postMessage({ event, body })
+  } else {
+    logger.warn(`[notifications] No parentPort available - running in standalone mode?`)
+  }
+}
+
 function sendToMeshMap(updates: Partial<NodeInfo & { name?: string }>, node?: NodeInfo, packet?: MeshPacket) {
   if (connectionStatus.value == "connected" && meshMapForwarding.value) {
     if (packet && packet.from != myNodeNum.value) updates.hopsAway = packet.hopStart - packet.hopLimit
@@ -379,12 +390,51 @@ export async function connect(address?: string) {
 
   /** TEXT_MESSAGE_APP */
   connection.events.onMessagePacket.subscribe((e) => {
+    logger.info("[notifications] MESSAGE PACKET RECEIVED - onMessagePacket triggered")
     const message = copy(e)
+    logger.debug("[notifications] Raw message data:", message)
     message.show = true
     let packet: MeshPacket
     packet = packets.upsert({ id: message.id, message })
+    logger.debug("[notifications] Packet after upsert:", { from: packet.from, to: packet.to, channel: packet.channel })
     const node = getNodeById(packet.from)
     if (packet?.viaMqtt === false) sendToMeshMap({ num: message.from }, node, packet)
+
+    // Send notification for incoming messages (only if not from our own node)
+    logger.debug(
+      `[notifications] Processing message: from=${packet.from}, myNodeNum=${myNodeNum.value}, hasText=${!!message.data}`,
+    )
+    logger.debug(`[notifications] Message data structure:`, message.data)
+    if (packet.from !== myNodeNum.value && message.data) {
+      const fromNode = getNodeById(packet.from)
+      const channelInfo = packet.channel ? channels.value.find((c) => c.index === packet.channel) : null
+      const isDirect = packet.to === myNodeNum.value
+
+      const notificationData = {
+        from: packet.from,
+        fromName: fromNode?.user?.longName || fromNode?.user?.shortName || `Node ${packet.from}`,
+        message: message.data,
+        channel: isDirect ? undefined : packet.channel,
+        channelName: isDirect ? undefined : channelInfo?.settings?.name || `Channel ${packet.channel}`,
+        isDirect,
+      }
+
+      logger.info(
+        `[notifications] Sending notification for ${isDirect ? "direct" : "channel"} message from ${notificationData.fromName}`,
+      )
+      logger.debug(`[notifications] Notification data:`, notificationData)
+      logger.info(
+        `[notifications] Sending notification for ${isDirect ? "direct" : "channel"} message from ${notificationData.fromName}`,
+      )
+      logger.debug(`[notifications] Notification data:`, notificationData)
+      sendToElectron("show-notification", notificationData)
+    } else {
+      if (packet.from === myNodeNum.value) {
+        logger.debug(`[notifications] Skipping notification - message from own node`)
+      } else if (!message.data) {
+        logger.debug(`[notifications] Skipping notification - no text content`)
+      }
+    }
   })
 
   /** TELEMETRY_APP */

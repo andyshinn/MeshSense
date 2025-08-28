@@ -4,6 +4,7 @@ import { spawn } from "child_process"
 import { app, BrowserWindow, ipcMain, shell, utilityProcess } from "electron"
 import { autoUpdater } from "electron-updater"
 import { buildMenu } from "./menu"
+import { initializeNotifications, showMessageNotification } from "./notifications"
 import { getWindowState, saveWindowState } from "./window"
 import { join } from "node:path"
 
@@ -144,6 +145,16 @@ app.whenReady().then(async () => {
           logger.debug("We are not running headless so loading main window URL")
           mainWindow.loadURL(`http://localhost:${apiPort}`)
         }
+      } else if (e.event == "notification-reply") {
+        // Forward notification replies to the API process for message sending
+        if (apiProcess) {
+          apiProcess.postMessage({ event: "send-message", body: e.body })
+        }
+      } else if (e.event == "show-notification") {
+        // Handle notification requests directly in main process
+        logger.info("[notifications] Received show-notification request from API")
+        logger.debug("[notifications] Notification data:", e.body)
+        showMessageNotification(e.body)
       }
     })
   }
@@ -190,6 +201,7 @@ app.whenReady().then(async () => {
   })
 
   buildMenu()
+  initializeNotifications()
   updateCheckLoop()
   // setTimeout(() => {
   //   autoUpdater.quitAndInstall()
